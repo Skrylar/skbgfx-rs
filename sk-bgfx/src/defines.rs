@@ -1,4 +1,3 @@
-#![feature(const_fn)]
 #![allow(non_snake_case)]
 
 pub const BGFX_API_VERSION: u32 = 76;

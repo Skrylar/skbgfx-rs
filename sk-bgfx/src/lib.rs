@@ -1,3 +1,4 @@
+#![feature(const_fn)]
 
-mod platform;
+pub mod defines;
 
