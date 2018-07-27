@@ -4,5 +4,6 @@ version = "0.1.0"
 authors = ["Joshua Cearley <joshua.cearley@gmail.com>"]
 
 [dependencies]
+va_list = "0.1.0"
 libc = "0.2"
 
