@@ -252,7 +252,7 @@ pub type UniformHandle = u16;
 pub type VertexBufferHandle = u16;
 pub type VertexDeclHandle = u16;
 
-pub type release_fn = extern fn(ptr: *mut c_void, userData: *mut c_void);
+pub type ReleaseFn = extern fn(ptr: *mut c_void, userData: *mut c_void);
 
 #[repr(C)]
 pub struct Memory {
@@ -270,58 +270,58 @@ pub type ViewId = u16;
 
 #[repr(C)]
 pub struct ViewStats {
-    pub name: [u8; 256],
-    pub view: ViewId,
-    pub cpuTimeElapsed: i64,
-    pub gpuTimeElapsed: i64,
+    pub name            : [u8; 256],
+    pub view            : ViewId,
+    pub cpu_time_elapsed: i64,
+    pub gpu_time_elapsed: i64,
 }
 
 #[repr(C)]
 pub struct EncoderStats {
-    pub cpuTimeBegin: i64,
-    pub cpuTimeEnd: i64,
+    pub cpu_time_begin: i64,
+    pub cpu_time_end  : i64,
 }
 
 #[repr(C)]
 pub struct Stats {
-    pub cpuTimeFrame           : i64,
-    pub cpuTimeBegin           : i64,
-    pub cpuTimeEnd             : i64,
-    pub cpuTimerFreq           : i64,
-    pub gpuTimeBegin           : i64,
-    pub gpuTimeEnd             : i64,
-    pub gpuTimerFreq           : i64,
-    pub waitRender             : i64,
-    pub waitSubmit             : i64,
-    pub numDraw                : u32,
-    pub numCompute             : u32,
-    pub maxGpuLatency          : u32,
-    pub numDynamicIndexBuffers : u16,
-    pub numDynamicVertexBuffers: u16,
-    pub numFrameBuffers        : u16,
-    pub numIndexBuffers        : u16,
-    pub numOcclusionQueries    : u16,
-    pub numPrograms            : u16,
-    pub numShaders             : u16,
-    pub numTextures            : u16,
-    pub numUniforms            : u16,
-    pub numVertexBuffers       : u16,
-    pub numVertexDecls         : u16,
-    pub textureMemoryUsed      : i64,
-    pub rtMemoryUsed           : i64,
-    pub transientVbUsed        : i32,
-    pub transientIbUsed        : i32,
-    pub numPrims               : [u32; TOPOLOGY_COUNT],
-    pub gpuMemoryMax           : i64,
-    pub gpuMemoryUsed          : i64,
-    pub width                  : u16,
-    pub height                 : u16,
-    pub textWidth              : u16,
-    pub textHeight             : u16,
-    pub numViews               : u16,
-    pub viewStats              : *mut ViewStats,
-    pub numEncoders            : u8,
-    pub encoderStats           : *mut EncoderStats,
+    pub cpu_time_frame            : i64,
+    pub cpu_time_begin            : i64,
+    pub cpu_time_end              : i64,
+    pub cpu_timer_freq            : i64,
+    pub gpu_time_begin            : i64,
+    pub gpu_time_end              : i64,
+    pub gpu_timer_freq            : i64,
+    pub wait_render               : i64,
+    pub wait_submit               : i64,
+    pub num_draw                  : u32,
+    pub num_compute               : u32,
+    pub max_gpu_latency           : u32,
+    pub num_dynamic_index_buffers : u16,
+    pub num_dynamic_vertex_buffers: u16,
+    pub num_frame_buffers         : u16,
+    pub num_index_buffers         : u16,
+    pub num_occlusion_queries     : u16,
+    pub num_programs              : u16,
+    pub num_shaders               : u16,
+    pub num_textures              : u16,
+    pub num_uniforms              : u16,
+    pub num_vertex_buffers        : u16,
+    pub num_vertex_decls          : u16,
+    pub texture_memory_used       : i64,
+    pub rt_memory_used            : i64,
+    pub transient_vb_used         : i32,
+    pub transient_ib_used         : i32,
+    pub num_prims                 : [u32; TOPOLOGY_COUNT],
+    pub gpu_memory_max            : i64,
+    pub gpu_memory_used           : i64,
+    pub width                     : u16,
+    pub height                    : u16,
+    pub text_width                : u16,
+    pub text_height               : u16,
+    pub num_views                 : u16,
+    pub view_stats                : *mut ViewStats,
+    pub num_encoders              : u8,
+    pub encoder_stats             : *mut EncoderStats,
 }
 
 #[repr(C)]
@@ -334,20 +334,20 @@ pub struct VertexDecl {
 
 #[repr(C)]
 pub struct TransientIndexBuffer {
-    pub data      : *mut u8,
-    pub size      : u32,
-    pub handle    : IndexBufferHandle,
-    pub startIndex: u32,
+    pub data       : *mut u8,
+    pub size       : u32,
+    pub handle     : IndexBufferHandle,
+    pub start_index: u32,
 }
 
 #[repr(C)]
 pub struct TransientVertexBuffer {
-    pub data       : *mut u8,
-    pub size       : u32,
-    pub startVertex: u32,
-    pub stride     : u16,
-    pub handle     : VertexBufferHandle,
-    pub decl       : VertexDeclHandle,
+    pub data        : *mut u8,
+    pub size        : u32,
+    pub start_vertex: u32,
+    pub stride      : u16,
+    pub handle      : VertexBufferHandle,
+    pub decl        : VertexDeclHandle,
 }
 
 #[repr(C)]
@@ -362,15 +362,15 @@ pub struct InstanceDataBuffer {
 
 #[repr(C)]
 pub struct TextureInfo {
-    pub format      : TextureFormat,
-    pub storageSize : u32,
-    pub width       : u16,
-    pub height      : u16,
-    pub depth       : u16,
-    pub numLayers   : u16,
-    pub numMips     : u8,
-    pub bitsPerPixel: u8,
-    pub cubeMap     : bool,
+    pub format        : TextureFormat,
+    pub storage_size  : u32,
+    pub width         : u16,
+    pub height        : u16,
+    pub depth         : u16,
+    pub num_layers    : u16,
+    pub num_mips      : u8,
+    pub bits_per_pixel: u8,
+    pub cube_map      : bool,
 }
 
 #[repr(C)]
@@ -389,48 +389,48 @@ pub struct Attachment {
 
 #[repr(C)]
 pub struct CapsGpu {
-    pub vendorId: u16,
-    pub deviceId: u16,
+    pub vendor_id: u16,
+    pub device_id: u16,
 }
 
 #[repr(C)]
 pub struct CapsLimits {
-    pub maxDrawCalls           : u32,
-    pub maxBlits               : u32,
-    pub maxTextureSize         : u32,
-    pub maxTextureLayers       : u32,
-    pub maxViews               : u32,
-    pub maxFrameBuffers        : u32,
-    pub maxFBAttachments       : u32,
-    pub maxPrograms            : u32,
-    pub maxShaders             : u32,
-    pub maxTextures            : u32,
-    pub maxTextureSamplers     : u32,
-    pub maxVertexDecls         : u32,
-    pub maxVertexStreams       : u32,
-    pub maxIndexBuffers        : u32,
-    pub maxVertexBuffers       : u32,
-    pub maxDynamicIndexBuffers : u32,
-    pub maxDynamicVertexBuffers: u32,
-    pub maxUniforms            : u32,
-    pub maxOcclusionQueries    : u32,
-    pub maxEncoders            : u32,
-    pub transientVbSize        : u32,
-    pub transientIbSize        : u32,
+    pub max_draw_calls            : u32,
+    pub max_blits                 : u32,
+    pub max_texture_size          : u32,
+    pub max_texture_layers        : u32,
+    pub max_views                 : u32,
+    pub max_frame_buffers         : u32,
+    pub max_fbattachments         : u32,
+    pub max_programs              : u32,
+    pub max_shaders               : u32,
+    pub max_textures              : u32,
+    pub max_texture_samplers      : u32,
+    pub max_vertex_decls          : u32,
+    pub max_vertex_streams        : u32,
+    pub max_index_buffers         : u32,
+    pub max_vertex_buffers        : u32,
+    pub max_dynamic_index_buffers : u32,
+    pub max_dynamic_vertex_buffers: u32,
+    pub max_uniforms              : u32,
+    pub max_occlusion_queries     : u32,
+    pub max_encoders              : u32,
+    pub transient_vb_size         : u32,
+    pub transient_ib_size         : u32,
 }
 
 #[repr(C)]
 pub struct Caps {
-    pub rendererKind    : RendererKind,
-    pub supported       : u64,
-    pub vendorId        : u16,
-    pub deviceId        : u16,
-    pub homogeneousDepth: bool,
-    pub originBottomLeft: bool,
-    pub numGPUs         : u8,
-    pub gpu             : [CapsGpu; 4],
-    pub limits          : CapsLimits,
-    pub formats         : [u16; TEXTURE_FORMAT_COUNT],
+    pub renderer_kind     : RendererKind,
+    pub supported         : u64,
+    pub vendor_id         : u16,
+    pub device_id         : u16,
+    pub homogeneous_depth : bool,
+    pub origin_bottom_left: bool,
+    pub num_gpus          : u8,
+    pub gpu               : [CapsGpu; 4],
+    pub limits            : CapsLimits,
+    pub formats           : [u16; TEXTURE_FORMAT_COUNT],
 }
 
 #[repr(C)]
@@ -523,16 +523,16 @@ pub struct Resolution {
 
 #[repr(C)]
 pub struct InitLimits {
-    pub maxEncoders    : u16,
-    pub transientVbSize: u32,
-    pub transientIbSize: u32,
+    pub max_encoders     : u16,
+    pub transient_vb_size: u32,
+    pub transient_ib_size: u32,
 }
 
 #[repr(C)]
 pub struct Init {
     pub kind      : RendererKind,
-    pub vendorId  : u16,
-    pub deviceId  : u16,
+    pub vendor_id : u16,
+    pub device_id : u16,
     pub debug     : bool,
     pub profile   : bool,
     pub resolution: Resolution,
