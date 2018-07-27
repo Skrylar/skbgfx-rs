@@ -14,18 +14,18 @@ pub enum RenderFrame {
 
 #[repr(C)]
 pub struct PlatformData {
-    ndt         : *mut c_void,
-    nwh         : *mut c_void,
-    context     : *mut c_void,
-    backBuffer  : *mut c_void,
-    backBufferDS: *mut c_void,
-    session     : *mut c_void,
+    pub ndt         : *mut c_void,
+    pub nwh         : *mut c_void,
+    pub context     : *mut c_void,
+    pub backBuffer  : *mut c_void,
+    pub backBufferDS: *mut c_void,
+    pub session     : *mut c_void,
 }
 
 #[repr(C)]
 pub struct InternalData {
-    caps   : *const Caps,
-    context: *mut c_void,
+    pub caps   : *const Caps,
+    pub context: *mut c_void,
 }
 
 extern "C" {
