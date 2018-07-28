@@ -242,7 +242,7 @@ pub enum ViewMode {
 
 pub const VIEW_MODE_COUNT: usize = 4;
 
-pub type DynamicIndexBufferHandle = u16;
+pub type DynamicIndexBufferHandleImpl = u16;
 pub type DynamicVertexBufferHandle = u16;
 pub type FrameBufferHandleImpl = u16;
 pub type IndexBufferHandleImpl = u16;
@@ -269,6 +269,7 @@ pub trait TextureHandle {
 pub struct FrameBufferHandle { handle: FrameBufferHandleImpl }
 pub struct IndexBufferHandle { handle: IndexBufferHandleImpl }
 pub struct VertexBufferHandle { handle: VertexBufferHandleImpl }
+pub struct DynamicIndexBufferHandle { handle: DynamicIndexBufferHandleImpl }
 
 #[repr(C)]
 pub struct Memory {
@@ -602,10 +603,10 @@ extern "C" {
     fn bgfx_destroy_index_buffer(handle: IndexBufferHandleImpl);
     fn bgfx_create_vertex_buffer(mem: *const Memory, decl: *const VertexDecl, flags: u16) -> VertexBufferHandleImpl;
     fn bgfx_destroy_vertex_buffer(handle: VertexBufferHandleImpl);
-    fn bgfx_create_dynamic_index_buffer(num: u32, flags: u16) -> DynamicIndexBufferHandle;
-    fn bgfx_create_dynamic_index_buffer_mem(mem: *const Memory, flags: u16) -> DynamicIndexBufferHandle;
-    fn bgfx_update_dynamic_index_buffer(handle: DynamicIndexBufferHandle, startIndex: u32, mem: *const Memory );
-    fn bgfx_destroy_dynamic_index_buffer(handle: DynamicIndexBufferHandle);
+    fn bgfx_create_dynamic_index_buffer(num: u32, flags: u16) -> DynamicIndexBufferHandleImpl;
+    fn bgfx_create_dynamic_index_buffer_mem(mem: *const Memory, flags: u16) -> DynamicIndexBufferHandleImpl;
+    fn bgfx_update_dynamic_index_buffer(handle: DynamicIndexBufferHandleImpl, startIndex: u32, mem: *const Memory );
+    fn bgfx_destroy_dynamic_index_buffer(handle: DynamicIndexBufferHandleImpl);
     fn bgfx_create_dynamic_vertex_buffer(num: u32, decl: *const VertexDecl, flags: u16) -> DynamicVertexBufferHandle;
     fn bgfx_create_dynamic_vertex_buffer_mem(mem: *const Memory, decl: *const VertexDecl, flags: u16) -> DynamicVertexBufferHandle;
     fn bgfx_update_dynamic_vertex_buffer(handle: DynamicVertexBufferHandle, startVertex: u32, mem: *const Memory );
@@ -676,7 +677,7 @@ extern "C" {
     fn bgfx_set_transform_cached(cache: u32, num: u16);
     fn bgfx_set_uniform(handle: UniformHandle, value: *const c_void, num: u16);
     fn bgfx_set_index_buffer(handle: IndexBufferHandleImpl, firstIndex: u32, numIndices: u32);
-    fn bgfx_set_dynamic_index_buffer(handle: DynamicIndexBufferHandle, firstIndex: u32, numIndices: u32);
+    fn bgfx_set_dynamic_index_buffer(handle: DynamicIndexBufferHandleImpl, firstIndex: u32, numIndices: u32);
     fn bgfx_set_transient_index_buffer(tib: *const TransientIndexBuffer, firstIndex: u32, numIndices: u32);
     fn bgfx_set_vertex_buffer(stream: u8, handle: VertexBufferHandleImpl, startVertex: u32, numVertices: u32);
     fn bgfx_set_dynamic_vertex_buffer(stream: u8, handle: DynamicVertexBufferHandle, startVertex: u32, numVertices: u32);
@@ -693,7 +694,7 @@ extern "C" {
     fn bgfx_set_image(stage: u8, handle: TextureHandleImpl, mip: u8, access: Access, format: TextureFormat);
     fn bgfx_set_compute_index_buffer(stage: u8, handle: IndexBufferHandleImpl, access: Access);
     fn bgfx_set_compute_vertex_buffer(stage: u8, handle: VertexBufferHandleImpl, access: Access);
-    fn bgfx_set_compute_dynamic_index_buffer(stage: u8, handle: DynamicIndexBufferHandle, access: Access);
+    fn bgfx_set_compute_dynamic_index_buffer(stage: u8, handle: DynamicIndexBufferHandleImpl, access: Access);
     fn bgfx_set_compute_dynamic_vertex_buffer(stage: u8, handle: DynamicVertexBufferHandle, access: Access);
     fn bgfx_set_compute_indirect_buffer(stage: u8, handle: IndirectBufferHandle, access: Access);
     fn bgfx_dispatch(id: ViewId, handle: ProgramHandle, numX: u32, numY: u32, numZ: u32, flags: u8);
@@ -711,7 +712,7 @@ extern "C" {
     fn bgfx_encoder_set_transform_cached(encoder: *mut EncoderImpl, cache: u32, num: u16);
     fn bgfx_encoder_set_uniform(encoder: *mut EncoderImpl, handle: UniformHandle, value: *const c_void, num: u16);
     fn bgfx_encoder_set_index_buffer(encoder: *mut EncoderImpl, handle: IndexBufferHandleImpl, firstIndex: u32, numIndices: u32);
-    fn bgfx_encoder_set_dynamic_index_buffer(encoder: *mut EncoderImpl, handle: DynamicIndexBufferHandle, firstIndex: u32, numIndices: u32);
+    fn bgfx_encoder_set_dynamic_index_buffer(encoder: *mut EncoderImpl, handle: DynamicIndexBufferHandleImpl, firstIndex: u32, numIndices: u32);
     fn bgfx_encoder_set_transient_index_buffer(encoder: *mut EncoderImpl, tib: *const TransientIndexBuffer, firstIndex: u32, numIndices: u32);
     fn bgfx_encoder_set_vertex_buffer(encoder: *mut EncoderImpl, stream: u8, handle: VertexBufferHandleImpl, startVertex: u32, numVertices: u32);
     fn bgfx_encoder_set_dynamic_vertex_buffer(encoder: *mut EncoderImpl, stream: u8, handle: DynamicVertexBufferHandle, startVertex: u32, numVertices: u32);
@@ -728,7 +729,7 @@ extern "C" {
     fn bgfx_encoder_set_image(encoder: *mut EncoderImpl, stage: u8, handle: TextureHandleImpl, mip: u8, access: Access, format: TextureFormat);
     fn bgfx_encoder_set_compute_index_buffer(encoder: *mut EncoderImpl, stage: u8, handle: IndexBufferHandleImpl, access: Access);
     fn bgfx_encoder_set_compute_vertex_buffer(encoder: *mut EncoderImpl, stage: u8, handle: VertexBufferHandleImpl, access: Access);
-    fn bgfx_encoder_set_compute_dynamic_index_buffer(encoder: *mut EncoderImpl, stage: u8, handle: DynamicIndexBufferHandle, access: Access);
+    fn bgfx_encoder_set_compute_dynamic_index_buffer(encoder: *mut EncoderImpl, stage: u8, handle: DynamicIndexBufferHandleImpl, access: Access);
     fn bgfx_encoder_set_compute_dynamic_vertex_buffer(encoder: *mut EncoderImpl, stage: u8, handle: DynamicVertexBufferHandle, access: Access);
     fn bgfx_encoder_set_compute_indirect_buffer(encoder: *mut EncoderImpl, stage: u8, handle: IndirectBufferHandle, access: Access);
     fn bgfx_encoder_dispatch(encoder: *mut EncoderImpl, id: ViewId, handle: ProgramHandle, numX: u32, numY: u32, numZ: u32, flags: u8);
@@ -838,7 +839,7 @@ impl Encoder {
         unsafe { bgfx_encoder_set_index_buffer(self.handle, handle, first_index, num_indices); }
     }
 
-    pub fn set_dynamic_index_buffer(&mut self, handle: DynamicIndexBufferHandle, first_index: u32, num_indices: u32) {
+    pub fn set_dynamic_index_buffer(&mut self, handle: DynamicIndexBufferHandleImpl, first_index: u32, num_indices: u32) {
         unsafe { bgfx_encoder_set_dynamic_index_buffer(self.handle, handle, first_index, num_indices); }
     }
 
@@ -906,7 +907,7 @@ impl Encoder {
         unsafe { bgfx_encoder_set_compute_vertex_buffer(self.handle, stage, handle, access); }
     }
 
-    pub fn set_compute_dynamic_index_buffer(&mut self, stage: u8, handle: DynamicIndexBufferHandle, access: Access) {
+    pub fn set_compute_dynamic_index_buffer(&mut self, stage: u8, handle: DynamicIndexBufferHandleImpl, access: Access) {
         unsafe { bgfx_encoder_set_compute_dynamic_index_buffer(self.handle, stage, handle, access); }
     }
 
@@ -966,7 +967,7 @@ pub fn set_compute_vertex_buffer(stage: u8, handle: VertexBufferHandleImpl, acce
     unsafe { bgfx_set_compute_vertex_buffer(stage, handle, access); }
 }
 
-pub fn set_compute_dynamic_index_buffer(stage: u8, handle: DynamicIndexBufferHandle, access: Access) {
+pub fn set_compute_dynamic_index_buffer(stage: u8, handle: DynamicIndexBufferHandleImpl, access: Access) {
     unsafe { bgfx_set_compute_dynamic_index_buffer(stage, handle, access); }
 }
 
@@ -1048,7 +1049,7 @@ pub fn set_index_buffer(handle: IndexBufferHandleImpl, first_index: u32, num_ind
     unsafe { bgfx_set_index_buffer(handle, first_index, num_indices); }
 }
 
-pub fn set_dynamic_index_buffer(handle: DynamicIndexBufferHandle, first_index: u32, num_indices: u32) {
+pub fn set_dynamic_index_buffer(handle: DynamicIndexBufferHandleImpl, first_index: u32, num_indices: u32) {
     unsafe { bgfx_set_dynamic_index_buffer(handle, first_index, num_indices); }
 }
 
@@ -1362,6 +1363,28 @@ impl Drop for VertexBufferHandle {
     }
 }
 
+impl DynamicIndexBufferHandle {
+    /// *TODO*: API is subject to change; flags to be replaced with a typed bitfield.
+    pub fn with_length(len: u32, flags: u16) -> DynamicIndexBufferHandle {
+        unsafe { DynamicIndexBufferHandle{handle: bgfx_create_dynamic_index_buffer(len, flags)}}
+    }
+
+    /// *TODO*: API is subject to change; flags to be replaced with a typed bitfield.
+    pub fn with_memory(mem: &Memory, flags: u16) -> DynamicIndexBufferHandle {
+        unsafe { DynamicIndexBufferHandle{handle: bgfx_create_dynamic_index_buffer_mem(mem, flags)}}
+    }
+
+    pub fn update(&mut self, start_index: u32, mem: &Memory) {
+        unsafe { bgfx_update_dynamic_index_buffer(self.handle, start_index, mem) }
+    }
+}
+
+impl Drop for DynamicIndexBufferHandle {
+    fn drop(&mut self) {
+        unsafe { bgfx_destroy_dynamic_index_buffer(self.handle) }
+    }
+}
+
 // fn bgfx_vertex_pack(input: [c_float; 4], inputNormalized: bool, attr: Attrib, decl: *const VertexDecl, data: *mut c_void, index: u32);
 // fn bgfx_vertex_unpack(output: [c_float; 4], attr: Attrib, decl: *const VertexDecl, data: *const c_void, index: u32);
 // fn bgfx_vertex_convert(destDecl: *const VertexDecl, destData: *mut c_void, srcDecl: *const VertexDecl, srcData: *const c_void, num: u32);
@@ -1379,10 +1402,6 @@ impl Drop for VertexBufferHandle {
 // fn bgfx_dbg_text_printf(x: u16, y: u16, attr: u8, format: *const c_char, ... );
 // fn bgfx_dbg_text_vprintf(x: u16, y: u16, attr: u8, format: *const c_char, argList: VaList);
 // fn bgfx_dbg_text_image(x: u16, y: u16, width: u16, height: u16, data: *const c_void, pitch: u16);
-// fn bgfx_create_dynamic_index_buffer(num: u32, flags: u16) -> DynamicIndexBufferHandle;
-// fn bgfx_create_dynamic_index_buffer_mem(mem: *const Memory, flags: u16) -> DynamicIndexBufferHandle;
-// fn bgfx_update_dynamic_index_buffer(handle: DynamicIndexBufferHandle, startIndex: u32, mem: *const Memory );
-// fn bgfx_destroy_dynamic_index_buffer(handle: DynamicIndexBufferHandle);
 // fn bgfx_create_dynamic_vertex_buffer(num: u32, decl: *const VertexDecl, flags: u16) -> DynamicVertexBufferHandle;
 // fn bgfx_create_dynamic_vertex_buffer_mem(mem: *const Memory, decl: *const VertexDecl, flags: u16) -> DynamicVertexBufferHandle;
 // fn bgfx_update_dynamic_vertex_buffer(handle: DynamicVertexBufferHandle, startVertex: u32, mem: *const Memory );
