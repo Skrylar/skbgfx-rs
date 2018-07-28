@@ -263,7 +263,7 @@ pub struct TextureHandleCube { handle: TextureHandleImpl }
 
 pub trait TextureHandle {
     fn set_name(&mut self, name: &str);
-    fn expose_handle(&self) -> TextureHandleImpl;
+    unsafe fn expose_handle(&self) -> TextureHandleImpl;
 }
 
 pub struct FrameBufferHandle { handle: FrameBufferHandleImpl }
@@ -1182,7 +1182,7 @@ impl TextureHandle for TextureHandle2D {
         unsafe { bgfx_set_texture_name(self.handle, ptr, cstr.to_bytes().len() as i32) }
     }
 
-    fn expose_handle(&self) -> TextureHandleImpl {
+    unsafe fn expose_handle(&self) -> TextureHandleImpl {
         self.handle
     }
 }
@@ -1217,7 +1217,7 @@ impl TextureHandle for TextureHandle3D {
         unsafe { bgfx_set_texture_name(self.handle, ptr, cstr.to_bytes().len() as i32); }
     }
 
-    fn expose_handle(&self) -> TextureHandleImpl {
+    unsafe fn expose_handle(&self) -> TextureHandleImpl {
         self.handle
     }
 }
@@ -1252,7 +1252,7 @@ impl TextureHandle for TextureHandleCube {
         unsafe { bgfx_set_texture_name(self.handle, ptr, cstr.to_bytes().len() as i32); }
     }
 
-    fn expose_handle(&self) -> TextureHandleImpl {
+    unsafe fn expose_handle(&self) -> TextureHandleImpl {
         self.handle
     }
 }
@@ -1305,9 +1305,11 @@ impl FrameBufferHandle {
         // textures. We don't (to keep the lifetimes of our
         // rustified handles valid) so we might be able to
         // get away with bullshitting the const checker here.
-        let mut y: Vec<TextureHandleImpl> = handles.into_iter().map(|x| x.expose_handle()).collect();
-        let x = y.as_mut_ptr() as *mut TextureHandleImpl;
-        unsafe { FrameBufferHandle{handle:bgfx_create_frame_buffer_from_handles(handles.len() as u8, x, false)} }
+        unsafe {
+            let mut y: Vec<TextureHandleImpl> = handles.into_iter().map(|x| x.expose_handle()).collect();
+            let x = y.as_mut_ptr() as *mut TextureHandleImpl;
+            FrameBufferHandle{handle:bgfx_create_frame_buffer_from_handles(handles.len() as u8, x, false)}
+        }
     }
 
 /* TODO
