@@ -1,3 +1,4 @@
+#![allow(improper_ctypes)] // because VaArgs are platform-dependent
 
 extern crate std;
 extern crate libc;
