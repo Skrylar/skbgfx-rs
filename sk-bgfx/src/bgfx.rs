@@ -1331,8 +1331,8 @@ convert them here to avoid violating lifetime concerns
 */
 
     /// *TODO*: API is subject to change; texture flags to be replaced with a typed bitfield.
-    pub fn with_native_window_handle(nwh: *mut c_void, width: u16, height: u16, depth_format: TextureFormat) -> FrameBufferHandle {
-        unsafe { FrameBufferHandle{handle:bgfx_create_frame_buffer_from_nwh(nwh, width, height, depth_format)} }
+    pub unsafe fn with_native_window_handle(nwh: *mut c_void, width: u16, height: u16, depth_format: TextureFormat) -> FrameBufferHandle {
+        FrameBufferHandle{handle:bgfx_create_frame_buffer_from_nwh(nwh, width, height, depth_format)}
     }
 }
 
