@@ -1289,16 +1289,16 @@ pub fn get_avail_instance_data_buffer(num: u32, stride: u16) -> u32 {
 
 impl FrameBufferHandle {
     /// *TODO*: API is subject to change; texture flags to be replaced with a typed bitfield.
-    pub fn from_size(width: u16, height: u16, format: TextureFormat, texture_flags: u32) -> FrameBufferHandle {
+    pub fn with_size(width: u16, height: u16, format: TextureFormat, texture_flags: u32) -> FrameBufferHandle {
         unsafe { FrameBufferHandle{handle:bgfx_create_frame_buffer(width, height, format, texture_flags)} }
     }
 
     /// *TODO*: API is subject to change; texture flags to be replaced with a typed bitfield.
-    pub fn from_backbuffer_ratio(ratio: BackbufferRatio, format: TextureFormat, texture_flags: u32) -> FrameBufferHandle {
+    pub fn with_backbuffer_ratio(ratio: BackbufferRatio, format: TextureFormat, texture_flags: u32) -> FrameBufferHandle {
         unsafe { FrameBufferHandle{handle:bgfx_create_frame_buffer_scaled(ratio, format, texture_flags)} }
     }
 
-    pub fn from_handles<T: TextureHandle>(handles: &[T]) -> FrameBufferHandle {
+    pub fn with_handles<T: TextureHandle>(handles: &[T]) -> FrameBufferHandle {
         if handles.len() > 255 { panic!("Handle slice size must be <= 255!") }
         // I'm pretty sure BGFX isn't meant to actually
         // modify these, UNLESS you allowed it to delete the
@@ -1319,7 +1319,7 @@ creating them requires the texture handle; so we end up
 having to keep a public/private pair of these structs and
 convert them here to avoid violating lifetime concerns
 
-    pub fn from_attachments(attachments: &[Attachment]) -> FrameBufferHandle {
+    pub fn with_attachments(attachments: &[Attachment]) -> FrameBufferHandle {
         if attachments.len() > 255 { panic!("Handle slice size must be <= 255!") }
         // I'm pretty sure BGFX isn't meant to actually
         // modify these, UNLESS you allowed it to delete the
@@ -1331,7 +1331,7 @@ convert them here to avoid violating lifetime concerns
 */
 
     /// *TODO*: API is subject to change; texture flags to be replaced with a typed bitfield.
-    pub fn from_native_window_handle(nwh: *mut c_void, width: u16, height: u16, depth_format: TextureFormat) -> FrameBufferHandle {
+    pub fn with_native_window_handle(nwh: *mut c_void, width: u16, height: u16, depth_format: TextureFormat) -> FrameBufferHandle {
         unsafe { FrameBufferHandle{handle:bgfx_create_frame_buffer_from_nwh(nwh, width, height, depth_format)} }
     }
 }
