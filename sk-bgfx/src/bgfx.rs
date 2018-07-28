@@ -3,7 +3,7 @@ extern crate std;
 extern crate libc;
 extern crate va_list;
 
-use self::libc::{c_void, c_float};
+use self::libc::{c_char, c_void, c_float};
 use self::va_list::VaList;
 use std::ffi::CString;
 
@@ -447,21 +447,21 @@ pub enum Fatal {
 pub struct CallbackVtbl {
     fatal: extern fn(this:*mut CallbackInterface,
                      code: Fatal,
-                     str: CString),
+                     str: *const c_char),
     trace_vargs: extern fn(this:*mut CallbackInterface,
-                           filePath: CString,
+                           filePath: *const c_char,
                            line: u16,
-                           format: CString,
+                           format: *const c_char,
                            argList: VaList),
     profiler_begin: extern fn(this:*mut CallbackInterface,
-                              name: CString,
+                              name: *const c_char,
                               abgr: u32,
-                              filePath: CString,
+                              filePath: *const c_char,
                               line: u16),
     profiler_begin_literal: extern fn(this:*mut CallbackInterface,
-                                      name: CString,
+                                      name: *const c_char,
                                       abgr: u32,
-                                      filePath: CString,
+                                      filePath: *const c_char,
                                       line: u16),
     profiler_end: extern fn(this: *mut CallbackInterface),
     cache_read_size: extern fn(this: *mut CallbackInterface,
@@ -475,7 +475,7 @@ pub struct CallbackVtbl {
                            data: *const c_void,
                            size: u32),
     screen_shot: extern fn(this: *mut CallbackInterface,
-                           filePath: CString,
+                           filePath: *const c_char,
                            width: u32,
                            height: u32,
                            pitch: u32,
@@ -510,7 +510,7 @@ pub struct AllocatorVtbl {
                            ptr: *mut c_void,
                            size: usize,
                            align: usize,
-                           file: CString,
+                           file: *const c_char,
                            line: u32) -> *mut c_void,
 }
 
@@ -557,7 +557,7 @@ extern "C" {
     fn bgfx_topology_convert(conversion: TopologyConvert, dst: *mut c_void, dstSize: u32, indices: *const c_void, numIndices: u32, index32: bool) -> u32;
     fn bgfx_topology_sort_tri_list(sort: TopologySort, dst: *mut c_void, dstSize: u32, dir: [c_float; 3], pos: [c_float; 3], vertices: *const c_void, stride: u32, indices: *const c_void, numIndices: u32, index32: bool);
     fn bgfx_get_supported_renderers(max: u8, kind: *mut RendererKind ) -> u8;
-    fn bgfx_get_renderer_name(kind: RendererKind) -> CString;
+    fn bgfx_get_renderer_name(kind: RendererKind) -> *const c_char;
     fn bgfx_init_ctor(init: *mut Init );
     fn bgfx_init(init: *const Init ) -> bool;
     fn bgfx_shutdown();
@@ -574,8 +574,8 @@ extern "C" {
     fn bgfx_make_ref_release(data: *const c_void, size: u32, releaseFn: ReleaseFn, userData: *mut c_void) -> *const Memory;
     fn bgfx_set_debug(debug: u32);
     fn bgfx_dbg_text_clear(attr: u8, small: bool);
-    fn bgfx_dbg_text_printf(x: u16, y: u16, attr: u8, format: CString, ... );
-    fn bgfx_dbg_text_vprintf(x: u16, y: u16, attr: u8, format: CString, argList: VaList);
+    fn bgfx_dbg_text_printf(x: u16, y: u16, attr: u8, format: *const c_char, ... );
+    fn bgfx_dbg_text_vprintf(x: u16, y: u16, attr: u8, format: *const c_char, argList: VaList);
     fn bgfx_dbg_text_image(x: u16, y: u16, width: u16, height: u16, data: *const c_void, pitch: u16);
     fn bgfx_create_index_buffer(mem: *const Memory, flags: u16) -> IndexBufferHandle;
     fn bgfx_destroy_index_buffer(handle: IndexBufferHandle);
@@ -601,7 +601,7 @@ extern "C" {
     fn bgfx_create_shader(mem: *const Memory ) -> ShaderHandle;
     fn bgfx_get_shader_uniforms(handle: ShaderHandle, uniforms: *mut UniformHandle, max: u16) -> u16;
     fn bgfx_get_uniform_info(handle: UniformHandle, info: *mut UniformInfo );
-    fn bgfx_set_shader_name(handle: ShaderHandle, name: CString, len: i32);
+    fn bgfx_set_shader_name(handle: ShaderHandle, name: *const c_char, len: i32);
     fn bgfx_destroy_shader(handle: ShaderHandle);
     fn bgfx_create_program(vsh: ShaderHandle, fsh: ShaderHandle, destroyShaders: bool) -> ProgramHandle;
     fn bgfx_create_compute_program(csh: ShaderHandle, destroyShaders: bool) -> ProgramHandle;
@@ -617,7 +617,7 @@ extern "C" {
     fn bgfx_update_texture_3d(handle: TextureHandle, mip: u8, x: u16, y: u16, z: u16, width: u16, height: u16, depth: u16, mem: *const Memory );
     fn bgfx_update_texture_cube(handle: TextureHandle, layer: u16, side: u8, mip: u8, x: u16, y: u16, width: u16, height: u16, mem: *const Memory, pitch: u16);
     fn bgfx_read_texture(handle: TextureHandle, data: *mut c_void, mip: u8) -> u32;
-    fn bgfx_set_texture_name(handle: TextureHandle, name: CString, len: i32);
+    fn bgfx_set_texture_name(handle: TextureHandle, name: *const c_char, len: i32);
     fn bgfx_destroy_texture(handle: TextureHandle);
     fn bgfx_create_frame_buffer(width: u16, height: u16, format: TextureFormat, textureFlags: u32) -> FrameBufferHandle;
     fn bgfx_create_frame_buffer_scaled(ratio: BackbufferRatio, format: TextureFormat, textureFlags: u32) -> FrameBufferHandle;
@@ -626,13 +626,13 @@ extern "C" {
     fn bgfx_create_frame_buffer_from_nwh(nwh: *mut c_void, width: u16, height: u16, depthFormat: TextureFormat) -> FrameBufferHandle;
     fn bgfx_get_texture(handle: FrameBufferHandle, attachment: u8) -> TextureHandle;
     fn bgfx_destroy_frame_buffer(handle: FrameBufferHandle);
-    fn bgfx_create_uniform(name: CString, kind: UniformKind, num: u16) -> UniformHandle;
+    fn bgfx_create_uniform(name: *const c_char, kind: UniformKind, num: u16) -> UniformHandle;
     fn bgfx_destroy_uniform(handle: UniformHandle);
     fn bgfx_create_occlusion_query() -> OcclusionQueryHandle;
     fn bgfx_get_result(handle: OcclusionQueryHandle, result: *mut i32) -> OcclusionQueryResult;
     fn bgfx_destroy_occlusion_query(handle: OcclusionQueryHandle);
     fn bgfx_set_palette_color(index: u8, rgba: [c_float; 4]);
-    fn bgfx_set_view_name(id: ViewId, name: CString);
+    fn bgfx_set_view_name(id: ViewId, name: *const c_char);
     fn bgfx_set_view_rect(id: ViewId, x: u16, y: u16, width: u16, height: u16);
     fn bgfx_set_view_rect_auto(id: ViewId, x: u16, y: u16, ratio: BackbufferRatio);
     fn bgfx_set_view_scissor(id: ViewId, x: u16, y: u16, width: u16, height: u16);
@@ -644,7 +644,7 @@ extern "C" {
     fn bgfx_set_view_transform_stereo(id: ViewId, view: *const c_void, projL: *const c_void, flags: u8, projR: *const c_void);
     fn bgfx_set_view_order(id: ViewId, num: u16, order: *const ViewId);
     fn bgfx_reset_view(id: ViewId);
-    fn bgfx_set_marker(marker: CString);
+    fn bgfx_set_marker(marker: *const c_char);
     fn bgfx_set_state(state: u64, rgba: u32);
     fn bgfx_set_condition(handle: OcclusionQueryHandle, visible: bool);
     fn bgfx_set_stencil(fstencil: u32, bstencil: u32);
@@ -679,7 +679,7 @@ extern "C" {
     fn bgfx_dispatch_indirect(id: ViewId, handle: ProgramHandle, indirectHandle: IndirectBufferHandle, start: u16, num: u16, flags: u8);
     fn bgfx_discard();
     fn bgfx_blit(id: ViewId, dst: TextureHandle, dstMip: u8, dstX: u16, dstY: u16, dstZ: u16, src: TextureHandle, srcMip: u8, srcX: u16, srcY: u16, srcZ: u16, width: u16, height: u16, depth: u16);
-    fn bgfx_encoder_set_marker(encoder: *mut Encoder, marker: CString);
+    fn bgfx_encoder_set_marker(encoder: *mut Encoder, marker: *const c_char);
     fn bgfx_encoder_set_state(encoder: *mut Encoder, state: u64, rgba: u32);
     fn bgfx_encoder_set_condition(encoder: *mut Encoder, handle: OcclusionQueryHandle, visible: bool);
     fn bgfx_encoder_set_stencil(encoder: *mut Encoder, fstencil: u32, bstencil: u32);
@@ -714,6 +714,6 @@ extern "C" {
     fn bgfx_encoder_dispatch_indirect(encoder: *mut Encoder, id: ViewId, handle: ProgramHandle, indirectHandle: IndirectBufferHandle, start: u16, num: u16, flags: u8);
     fn bgfx_encoder_discard(encoder: *mut Encoder);
     fn bgfx_encoder_blit(encoder: *mut Encoder, id: ViewId, dst: TextureHandle, dstMip: u8, dstX: u16, dstY: u16, dstZ: u16, src: TextureHandle, srcMip: u8, srcX: u16, srcY: u16, srcZ: u16, width: u16, height: u16, depth: u16);
-    fn bgfx_request_screen_shot(handle: FrameBufferHandle, filePath: CString);
+    fn bgfx_request_screen_shot(handle: FrameBufferHandle, filePath: *const c_char);
 }
 
