@@ -7,7 +7,7 @@ extern crate va_list;
 use self::libc::{c_char, c_void, c_float};
 use self::va_list::VaList;
 use std::ffi::{CString,CStr};
-use std::mem::transmute;
+use std::mem::{uninitialized,transmute};
 
 #[repr(C)]
 pub enum RendererKind {
@@ -20,6 +20,7 @@ pub enum RendererKind {
     Opengles,
     Opengl,
     Vulkan,
+    Default
 }
 
 pub const RENDERER_KIND_COUNT: usize = 9;
@@ -243,7 +244,7 @@ pub const VIEW_MODE_COUNT: usize = 4;
 
 pub type DynamicIndexBufferHandle = u16;
 pub type DynamicVertexBufferHandle = u16;
-pub type FrameBufferHandle = u16;
+pub type FrameBufferHandleImpl = u16;
 pub type IndexBufferHandle = u16;
 pub type IndirectBufferHandle = u16;
 pub type OcclusionQueryHandle = u16;
@@ -264,6 +265,8 @@ pub trait TextureHandle {
     fn set_name(&mut self, name: &str);
     fn expose_handle(&self) -> TextureHandleImpl;
 }
+
+pub struct FrameBufferHandle { handle: FrameBufferHandleImpl }
 
 #[repr(C)]
 pub struct Memory {
@@ -635,13 +638,13 @@ extern "C" {
     fn bgfx_read_texture(handle: TextureHandleImpl, data: *mut c_void, mip: u8) -> u32;
     fn bgfx_set_texture_name(handle: TextureHandleImpl, name: *const c_char, len: i32);
     fn bgfx_destroy_texture(handle: TextureHandleImpl);
-    fn bgfx_create_frame_buffer(width: u16, height: u16, format: TextureFormat, textureFlags: u32) -> FrameBufferHandle;
-    fn bgfx_create_frame_buffer_scaled(ratio: BackbufferRatio, format: TextureFormat, textureFlags: u32) -> FrameBufferHandle;
-    fn bgfx_create_frame_buffer_from_handles(num: u8, handles: *const TextureHandleImpl, destroyTextures: bool) -> FrameBufferHandle;
-    fn bgfx_create_frame_buffer_from_attachment(num: u8, attachment: *const Attachment, destroyTextures: bool) -> FrameBufferHandle;
-    fn bgfx_create_frame_buffer_from_nwh(nwh: *mut c_void, width: u16, height: u16, depthFormat: TextureFormat) -> FrameBufferHandle;
-    fn bgfx_get_texture(handle: FrameBufferHandle, attachment: u8) -> TextureHandleImpl;
-    fn bgfx_destroy_frame_buffer(handle: FrameBufferHandle);
+    fn bgfx_create_frame_buffer(width: u16, height: u16, format: TextureFormat, texture_flags: u32) -> FrameBufferHandleImpl;
+    fn bgfx_create_frame_buffer_scaled(ratio: BackbufferRatio, format: TextureFormat, texture_flags: u32) -> FrameBufferHandleImpl;
+    fn bgfx_create_frame_buffer_from_handles(num: u8, handles: *const TextureHandleImpl, destroyTextures: bool) -> FrameBufferHandleImpl;
+    fn bgfx_create_frame_buffer_from_attachment(num: u8, attachment: *const Attachment, destroyTextures: bool) -> FrameBufferHandleImpl;
+    fn bgfx_create_frame_buffer_from_nwh(nwh: *mut c_void, width: u16, height: u16, depth_format: TextureFormat) -> FrameBufferHandleImpl;
+    fn bgfx_get_texture(handle: FrameBufferHandleImpl, attachment: u8) -> TextureHandleImpl;
+    fn bgfx_destroy_frame_buffer(handle: FrameBufferHandleImpl);
     fn bgfx_create_uniform(name: *const c_char, kind: UniformKind, num: u16) -> UniformHandle;
     fn bgfx_destroy_uniform(handle: UniformHandle);
     fn bgfx_create_occlusion_query() -> OcclusionQueryHandle;
@@ -655,7 +658,7 @@ extern "C" {
     fn bgfx_set_view_clear(id: ViewId, flags: u16, rgba: u32, depth: c_float, stencil: u8);
     fn bgfx_set_view_clear_mrt(id: ViewId, flags: u16, depth: c_float, stencil: u8, param0: u8, param1: u8, param2: u8, param3: u8, param4: u8, param5: u8, param6: u8, param7: u8);
     fn bgfx_set_view_mode(id: ViewId, mode: ViewMode);
-    fn bgfx_set_view_frame_buffer(id: ViewId, handle: FrameBufferHandle);
+    fn bgfx_set_view_frame_buffer(id: ViewId, handle: FrameBufferHandleImpl);
     fn bgfx_set_view_transform(id: ViewId, view: *const c_void, proj: *const c_void);
     fn bgfx_set_view_transform_stereo(id: ViewId, view: *const c_void, projL: *const c_void, flags: u8, projR: *const c_void);
     fn bgfx_set_view_order(id: ViewId, num: u16, order: *const ViewId);
@@ -730,16 +733,25 @@ extern "C" {
     fn bgfx_encoder_dispatch_indirect(encoder: *mut EncoderImpl, id: ViewId, handle: ProgramHandle, indirectHandle: IndirectBufferHandle, start: u16, num: u16, flags: u8);
     fn bgfx_encoder_discard(encoder: *mut EncoderImpl);
     fn bgfx_encoder_blit(encoder: *mut EncoderImpl, id: ViewId, dst: TextureHandleImpl, dstMip: u8, dstX: u16, dstY: u16, dstZ: u16, src: TextureHandleImpl, srcMip: u8, srcX: u16, srcY: u16, srcZ: u16, width: u16, height: u16, depth: u16);
-    fn bgfx_request_screen_shot(handle: FrameBufferHandle, filePath: *const c_char);
+    fn bgfx_request_screen_shot(handle: FrameBufferHandleImpl, filePath: *const c_char);
 }
 
 impl Init {
+    pub fn with_defaults() -> Init {
+        unsafe {
+            // bgfx includes its own ctor for this
+            let mut result: Init = uninitialized();
+            result.ctor();
+            result
+        }
+    }
+
     pub fn ctor(&mut self) {
         unsafe { bgfx_init_ctor(self); }
     }
 }
 
-pub fn init(init: &Init ) -> bool {
+pub fn init(init: &Init) -> bool {
     unsafe { return bgfx_init(init); }
 
 }
@@ -980,7 +992,7 @@ pub fn blit(id: ViewId, dst: TextureHandleImpl, dst_mip: u8, dst_x: u16, dst_y: 
     unsafe { bgfx_blit(id, dst, dst_mip, dst_x, dst_y, dst_z, src, src_mip, src_x, src_y, src_z, width, height, depth); }
 }
 
-pub fn request_screen_shot_cstr(handle: FrameBufferHandle, file_path: &CStr) {
+pub fn request_screen_shot_cstr(handle: FrameBufferHandleImpl, file_path: &CStr) {
     let ptr = file_path.as_ptr();
     unsafe { bgfx_request_screen_shot(handle, ptr); }
 }
@@ -1111,7 +1123,7 @@ pub fn set_view_mode(id: ViewId, mode: ViewMode) {
     unsafe { bgfx_set_view_mode(id, mode); }
 }
 
-pub fn set_view_frame_buffer(id: ViewId, handle: FrameBufferHandle) {
+pub fn set_view_frame_buffer(id: ViewId, handle: FrameBufferHandleImpl) {
     unsafe { bgfx_set_view_frame_buffer(id, handle); }
 }
 
@@ -1249,14 +1261,83 @@ impl Drop for TextureHandleCube {
     }
 }
 
+pub fn get_supported_renderers(max: u8, kind: RendererKind ) -> u8 {
+    // i don't think the enum actually gets modified C-side,
+    // but they didn't mark it as const so we make a copy
+    // here to be safe.
+    let mut here = kind;
+    unsafe { bgfx_get_supported_renderers(max, &mut here) }
+}
+
+pub fn get_renderer_type() -> RendererKind {
+    unsafe { bgfx_get_renderer_type() }
+}
+
+pub fn get_avail_transient_index_buffer(num: u32) -> u32 {
+    unsafe { bgfx_get_avail_transient_index_buffer(num) }
+}
+
+pub fn get_avail_transient_vertex_buffer(num: u32, decl: &VertexDecl) -> u32 {
+    unsafe { bgfx_get_avail_transient_vertex_buffer(num, decl) }
+}
+
+pub fn get_avail_instance_data_buffer(num: u32, stride: u16) -> u32 {
+    unsafe { bgfx_get_avail_instance_data_buffer(num, stride) }
+}
+
+impl FrameBufferHandle {
+    /// *TODO*: API is subject to change; texture flags to be replaced with a typed bitfield.
+    pub fn from_size(width: u16, height: u16, format: TextureFormat, texture_flags: u32) -> FrameBufferHandle {
+        unsafe { FrameBufferHandle{handle:bgfx_create_frame_buffer(width, height, format, texture_flags)} }
+    }
+
+    /// *TODO*: API is subject to change; texture flags to be replaced with a typed bitfield.
+    pub fn from_backbuffer_ratio(ratio: BackbufferRatio, format: TextureFormat, texture_flags: u32) -> FrameBufferHandle {
+        unsafe { FrameBufferHandle{handle:bgfx_create_frame_buffer_scaled(ratio, format, texture_flags)} }
+    }
+
+    pub fn from_handles<T: TextureHandle>(handles: &[T]) -> FrameBufferHandle {
+        if handles.len() > 255 { panic!("Handle slice size must be <= 255!") }
+        // I'm pretty sure BGFX isn't meant to actually
+        // modify these, UNLESS you allowed it to delete the
+        // textures. We don't (to keep the lifetimes of our
+        // rustified handles valid) so we might be able to
+        // get away with bullshitting the const checker here.
+        let mut y: Vec<TextureHandleImpl> = handles.into_iter().map(|x| x.expose_handle()).collect();
+        let x = y.as_mut_ptr() as *mut TextureHandleImpl;
+        unsafe { FrameBufferHandle{handle:bgfx_create_frame_buffer_from_handles(handles.len() as u8, x, false)} }
+    }
+
+/* TODO
+this is tricky because we don't want to clone attachments
+(would violate lifetime assertion of their textures) but
+creating them requires the texture handle; so we end up
+having to keep a public/private pair of these structs and
+convert them here to avoid violating lifetime concerns
+
+    pub fn from_attachments(attachments: &[Attachment]) -> FrameBufferHandle {
+        if attachments.len() > 255 { panic!("Handle slice size must be <= 255!") }
+        // I'm pretty sure BGFX isn't meant to actually
+        // modify these, UNLESS you allowed it to delete the
+        // textures. We don't (to keep the lifetimes of our
+        // rustified handles valid) so we might be able to
+        // get away with bullshitting the const checker here.
+        unsafe { FrameBufferHandle{handle:bgfx_create_frame_buffer_from_attachment(attachments.len() as u8, x as *mut Attachment, false)} }
+    }
+*/
+
+    /// *TODO*: API is subject to change; texture flags to be replaced with a typed bitfield.
+    pub fn from_native_window_handle(nwh: *mut c_void, width: u16, height: u16, depth_format: TextureFormat) -> FrameBufferHandle {
+        unsafe { FrameBufferHandle{handle:bgfx_create_frame_buffer_from_nwh(nwh, width, height, depth_format)} }
+    }
+}
+
 // fn bgfx_vertex_pack(input: [c_float; 4], inputNormalized: bool, attr: Attrib, decl: *const VertexDecl, data: *mut c_void, index: u32);
 // fn bgfx_vertex_unpack(output: [c_float; 4], attr: Attrib, decl: *const VertexDecl, data: *const c_void, index: u32);
 // fn bgfx_vertex_convert(destDecl: *const VertexDecl, destData: *mut c_void, srcDecl: *const VertexDecl, srcData: *const c_void, num: u32);
 // fn bgfx_weld_vertices(output: *mut u16, decl: *const VertexDecl, data: *const c_void, num: u16, epsilon: c_float) -> u16;
 // fn bgfx_topology_convert(conversion: TopologyConvert, dst: *mut c_void, dstSize: u32, indices: *const c_void, numIndices: u32, index32: bool) -> u32;
 // fn bgfx_topology_sort_tri_list(sort: TopologySort, dst: *mut c_void, dstSize: u32, dir: [c_float; 3], pos: [c_float; 3], vertices: *const c_void, stride: u32, indices: *const c_void, numIndices: u32, index32: bool);
-// fn bgfx_get_supported_renderers(max: u8, kind: *mut RendererKind ) -> u8;
-// fn bgfx_get_renderer_type() -> RendererKind;
 // fn bgfx_get_caps() -> *const Caps;
 // fn bgfx_get_stats() -> *const Stats;
 // fn bgfx_alloc(size: u32) -> *const Memory;
@@ -1280,9 +1361,6 @@ impl Drop for TextureHandleCube {
 // fn bgfx_create_dynamic_vertex_buffer_mem(mem: *const Memory, decl: *const VertexDecl, flags: u16) -> DynamicVertexBufferHandle;
 // fn bgfx_update_dynamic_vertex_buffer(handle: DynamicVertexBufferHandle, startVertex: u32, mem: *const Memory );
 // fn bgfx_destroy_dynamic_vertex_buffer(handle: DynamicVertexBufferHandle);
-// fn bgfx_get_avail_transient_index_buffer(num: u32) -> u32;
-// fn bgfx_get_avail_transient_vertex_buffer(num: u32, decl: *const VertexDecl) -> u32;
-// fn bgfx_get_avail_instance_data_buffer(num: u32, stride: u16) -> u32;
 // fn bgfx_alloc_transient_index_buffer(tib: *mut TransientIndexBuffer, num: u32);
 // fn bgfx_alloc_transient_vertex_buffer(tvb: *mut TransientVertexBuffer, num: u32, decl: *const VertexDecl );
 // fn bgfx_alloc_transient_buffers(tvb: *mut TransientVertexBuffer, decl: *const VertexDecl, numVertices: u32, tib: *mut TransientIndexBuffer, numIndices: u32) -> bool;
@@ -1304,13 +1382,8 @@ impl Drop for TextureHandleCube {
 // fn bgfx_create_texture_2d_scaled(ratio: BackbufferRatio, hasMips: bool, numLayers: u16, format: TextureFormat, flags: u32) -> TextureHandleImpl;
 // fn bgfx_create_texture_3d(width: u16, height: u16, depth: u16, hasMips: bool, format: TextureFormat, flags: u32, mem: *const Memory ) -> TextureHandleImpl;
 // fn bgfx_create_texture_cube(size: u16, hasMips: bool, numLayers: u16, format: TextureFormat, flags: u32, mem: *const Memory ) -> TextureHandleImpl;
-// fn bgfx_create_frame_buffer(width: u16, height: u16, format: TextureFormat, textureFlags: u32) -> FrameBufferHandle;
-// fn bgfx_create_frame_buffer_scaled(ratio: BackbufferRatio, format: TextureFormat, textureFlags: u32) -> FrameBufferHandle;
-// fn bgfx_create_frame_buffer_from_handles(num: u8, handles: *const TextureHandleImpl, destroyTextures: bool) -> FrameBufferHandle;
-// fn bgfx_create_frame_buffer_from_attachment(num: u8, attachment: *const Attachment, destroyTextures: bool) -> FrameBufferHandle;
-// fn bgfx_create_frame_buffer_from_nwh(nwh: *mut c_void, width: u16, height: u16, depthFormat: TextureFormat) -> FrameBufferHandle;
-// fn bgfx_get_texture(handle: FrameBufferHandle, attachment: u8) -> TextureHandleImpl;
-// fn bgfx_destroy_frame_buffer(handle: FrameBufferHandle);
+// fn bgfx_get_texture(handle: FrameBufferHandleImpl, attachment: u8) -> TextureHandleImpl;
+// fn bgfx_destroy_frame_buffer(handle: FrameBufferHandleImpl);
 // fn bgfx_create_uniform(name: *const c_char, kind: UniformKind, num: u16) -> UniformHandle;
 // fn bgfx_destroy_uniform(handle: UniformHandle);
 // fn bgfx_create_occlusion_query() -> OcclusionQueryHandle;
