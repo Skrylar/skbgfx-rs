@@ -769,8 +769,9 @@ impl Encoder {
         unsafe { return Encoder{handle: bgfx_begin()} }
     }
 
-    pub fn set_marker(&mut self, marker: &c_char) {
-        unsafe { bgfx_encoder_set_marker(self.handle, marker); }
+    pub fn set_marker(&mut self, marker: &CStr) {
+        let ptr = marker.as_ptr();
+        unsafe { bgfx_encoder_set_marker(self.handle, ptr); }
     }
 
     pub fn set_state(&mut self, state: u64, rgba: u32) {
@@ -1067,6 +1068,58 @@ pub fn touch(id: ViewId) {
     unsafe { bgfx_touch(id); }
 }
 
+pub fn set_palette_color(index: u8, rgba: [c_float; 4]) {
+    unsafe { bgfx_set_palette_color(index, rgba); }
+}
+
+pub fn set_view_name(id: ViewId, name: &CStr) {
+    let ptr = name.as_ptr();
+    unsafe { bgfx_set_view_name(id, ptr); }
+}
+
+pub fn set_view_rect(id: ViewId, x: u16, y: u16, width: u16, height: u16) {
+    unsafe { bgfx_set_view_rect(id, x, y, width, height); }
+}
+
+pub fn set_view_rect_auto(id: ViewId, x: u16, y: u16, ratio: BackbufferRatio) {
+    unsafe { bgfx_set_view_rect_auto(id, x, y, ratio); }
+}
+
+pub fn set_view_scissor(id: ViewId, x: u16, y: u16, width: u16, height: u16) {
+    unsafe { bgfx_set_view_scissor(id, x, y, width, height); }
+}
+
+pub fn set_view_clear(id: ViewId, flags: u16, rgba: u32, depth: c_float, stencil: u8) {
+    unsafe { bgfx_set_view_clear(id, flags, rgba, depth, stencil); }
+}
+
+pub fn set_view_clear_mrt(id: ViewId, flags: u16, depth: c_float, stencil: u8, param0: u8, param1: u8, param2: u8, param3: u8, param4: u8, param5: u8, param6: u8, param7: u8) {
+    unsafe { bgfx_set_view_clear_mrt(id, flags, depth, stencil, param0, param1, param2, param3, param4, param5, param6, param7); }
+}
+
+pub fn set_view_mode(id: ViewId, mode: ViewMode) {
+    unsafe { bgfx_set_view_mode(id, mode); }
+}
+
+pub fn set_view_frame_buffer(id: ViewId, handle: FrameBufferHandle) {
+    unsafe { bgfx_set_view_frame_buffer(id, handle); }
+}
+
+/* TODO rust api
+pub fn set_view_transform(id: ViewId, view: *c_void, proj: *c_void) {
+    unsafe { bgfx_set_view_transform(id, view, proj); }
+}
+
+pub fn set_view_transform_stereo(id: ViewId, view: *c_void, projL: *c_void, flags: u8, projR: *c_void) {
+    unsafe { bgfx_set_view_transform_stereo(id, view, projL, flags, projR); }
+}
+
+pub fn set_view_order(id: ViewId, num: u16, order: *ViewId) {
+    unsafe { bgfx_set_view_order(id, num, order); }
+}
+*/
+
+
 
 
 
@@ -1146,16 +1199,3 @@ pub fn touch(id: ViewId) {
 // fn bgfx_create_occlusion_query() -> OcclusionQueryHandle;
 // fn bgfx_get_result(handle: OcclusionQueryHandle, result: *mut i32) -> OcclusionQueryResult;
 // fn bgfx_destroy_occlusion_query(handle: OcclusionQueryHandle);
-// fn bgfx_set_palette_color(index: u8, rgba: [c_float; 4]);
-// fn bgfx_set_view_name(id: ViewId, name: *const c_char);
-// fn bgfx_set_view_rect(id: ViewId, x: u16, y: u16, width: u16, height: u16);
-// fn bgfx_set_view_rect_auto(id: ViewId, x: u16, y: u16, ratio: BackbufferRatio);
-// fn bgfx_set_view_scissor(id: ViewId, x: u16, y: u16, width: u16, height: u16);
-// fn bgfx_set_view_clear(id: ViewId, flags: u16, rgba: u32, depth: c_float, stencil: u8);
-// fn bgfx_set_view_clear_mrt(id: ViewId, flags: u16, depth: c_float, stencil: u8, param0: u8, param1: u8, param2: u8, param3: u8, param4: u8, param5: u8, param6: u8, param7: u8);
-// fn bgfx_set_view_mode(id: ViewId, mode: ViewMode);
-// fn bgfx_set_view_frame_buffer(id: ViewId, handle: FrameBufferHandle);
-// fn bgfx_set_view_transform(id: ViewId, view: *const c_void, proj: *const c_void);
-// fn bgfx_set_view_transform_stereo(id: ViewId, view: *const c_void, projL: *const c_void, flags: u8, projR: *const c_void);
-// fn bgfx_set_view_order(id: ViewId, num: u16, order: *const ViewId);
-//
