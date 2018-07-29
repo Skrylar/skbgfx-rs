@@ -9,6 +9,10 @@ use self::va_list::VaList;
 use std::ffi::{CString,CStr};
 use std::mem::{uninitialized,transmute};
 
+/// Sentinel to manage objects with a single-frame lifetime, Advances
+/// to the next frame when dropped.
+pub struct Frame {}
+
 #[repr(C)]
 pub enum RendererKind {
     Noop,
@@ -1156,6 +1160,10 @@ pub fn reset(width: u32, height: u32, flags: u32) {
     unsafe { bgfx_reset(width, height, flags); }
 }
 
+/// Advances to the next frame. `capture` will catch the frame in
+/// the graphics debugger. Returns the current frame number. Note
+/// that the `Frame` sentinel calls this when dropped, so you don't
+/// need to use both at once.
 pub fn frame(capture: bool) -> u32 {
     unsafe { return bgfx_frame(capture); }
 }
@@ -1408,6 +1416,38 @@ impl Drop for DynamicVertexBufferHandle {
     }
 }
 
+impl TransientIndexBuffer {
+    pub unsafe fn into(tib: &mut TransientIndexBuffer, len: u32) {
+        bgfx_alloc_transient_index_buffer(tib, len)
+    }
+
+    pub fn allocate<'a>(_frame: &'a Frame, buf: &'a mut TransientIndexBuffer, len: u32) {
+        unsafe {TransientIndexBuffer::into(buf, len)}
+    }
+}
+
+impl TransientVertexBuffer {
+    pub unsafe fn into(tvb: &mut TransientVertexBuffer, len: u32, decl: &VertexDecl) {
+        bgfx_alloc_transient_vertex_buffer(tvb, len, decl)
+    }
+
+    pub fn allocate<'a>(_frame: &'a Frame, buf: &'a mut TransientVertexBuffer, len: u32, decl: &VertexDecl) {
+        unsafe {TransientVertexBuffer::into(buf, len, decl)}
+    }
+}
+
+impl InstanceDataBuffer {
+    pub unsafe fn into(idb: &mut InstanceDataBuffer, len: u32, stride: u16) {
+        // TODO check that stride is a multiple of 16
+        bgfx_alloc_instance_data_buffer(idb, len, stride)
+    }
+
+    pub fn allocate<'a>(_frame: &'a Frame, idb: &mut InstanceDataBuffer, len: u32, stride: u16) {
+        unsafe{InstanceDataBuffer::into(idb, len, stride)}
+    }
+}
+
+
 // fn bgfx_vertex_pack(input: [c_float; 4], inputNormalized: bool, attr: Attrib, decl: *const VertexDecl, data: *mut c_void, index: u32);
 // fn bgfx_vertex_unpack(output: [c_float; 4], attr: Attrib, decl: *const VertexDecl, data: *const c_void, index: u32);
 // fn bgfx_vertex_convert(destDecl: *const VertexDecl, destData: *mut c_void, srcDecl: *const VertexDecl, srcData: *const c_void, num: u32);
@@ -1425,10 +1465,6 @@ impl Drop for DynamicVertexBufferHandle {
 // fn bgfx_dbg_text_printf(x: u16, y: u16, attr: u8, format: *const c_char, ... );
 // fn bgfx_dbg_text_vprintf(x: u16, y: u16, attr: u8, format: *const c_char, argList: VaList);
 // fn bgfx_dbg_text_image(x: u16, y: u16, width: u16, height: u16, data: *const c_void, pitch: u16);
-// fn bgfx_alloc_transient_index_buffer(tib: *mut TransientIndexBuffer, num: u32);
-// fn bgfx_alloc_transient_vertex_buffer(tvb: *mut TransientVertexBuffer, num: u32, decl: *const VertexDecl );
-// fn bgfx_alloc_transient_buffers(tvb: *mut TransientVertexBuffer, decl: *const VertexDecl, numVertices: u32, tib: *mut TransientIndexBuffer, numIndices: u32) -> bool;
-// fn bgfx_alloc_instance_data_buffer(idb: *mut InstanceDataBuffer, num: u32, stride: u16);
 // fn bgfx_create_indirect_buffer(num: u32) -> IndirectBufferHandle;
 // fn bgfx_destroy_indirect_buffer(handle: IndirectBufferHandle);
 // fn bgfx_create_shader(mem: *const Memory ) -> ShaderHandle;
