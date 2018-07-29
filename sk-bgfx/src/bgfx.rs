@@ -1346,6 +1346,12 @@ convert them here to avoid violating lifetime concerns
     }
 }
 
+impl Drop for FrameBufferHandle {
+    fn drop(&mut self) {
+        unsafe {bgfx_destroy_frame_buffer(self.handle) }
+    }
+}
+
 impl IndexBufferHandle {
     /// *TODO*: API is subject to change; flags to be replaced with a typed bitfield.
     pub fn bgfx_create_index_buffer(mem: &Memory, flags: u16) -> IndexBufferHandle {
@@ -1483,7 +1489,6 @@ impl InstanceDataBuffer {
 // fn bgfx_create_texture_3d(width: u16, height: u16, depth: u16, hasMips: bool, format: TextureFormat, flags: u32, mem: *const Memory ) -> TextureHandleImpl;
 // fn bgfx_create_texture_cube(size: u16, hasMips: bool, numLayers: u16, format: TextureFormat, flags: u32, mem: *const Memory ) -> TextureHandleImpl;
 // fn bgfx_get_texture(handle: FrameBufferHandleImpl, attachment: u8) -> TextureHandleImpl;
-// fn bgfx_destroy_frame_buffer(handle: FrameBufferHandleImpl);
 // fn bgfx_create_uniform(name: *const c_char, kind: UniformKind, num: u16) -> UniformHandle;
 // fn bgfx_destroy_uniform(handle: UniformHandle);
 // fn bgfx_create_occlusion_query() -> OcclusionQueryHandle;
