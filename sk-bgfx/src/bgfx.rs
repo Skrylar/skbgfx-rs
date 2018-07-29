@@ -253,7 +253,7 @@ pub type IndexBufferHandleImpl = u16;
 pub type IndirectBufferHandle = u16;
 pub type OcclusionQueryHandle = u16;
 pub type ProgramHandle = u16;
-pub type ShaderHandle = u16;
+pub type ShaderHandleImpl = u16;
 pub type TextureHandleImpl = u16;
 pub type UniformHandle = u16;
 pub type VertexBufferHandleImpl = u16;
@@ -275,6 +275,7 @@ pub struct IndexBufferHandle { handle: IndexBufferHandleImpl }
 pub struct VertexBufferHandle { handle: VertexBufferHandleImpl }
 pub struct DynamicIndexBufferHandle { handle: DynamicIndexBufferHandleImpl }
 pub struct DynamicVertexBufferHandle { handle: DynamicVertexBufferHandleImpl }
+pub struct ShaderHandle { handle: ShaderHandleImpl }
 
 #[repr(C)]
 pub struct Memory {
@@ -625,13 +626,13 @@ extern "C" {
     fn bgfx_alloc_instance_data_buffer(idb: *mut InstanceDataBuffer, num: u32, stride: u16);
     fn bgfx_create_indirect_buffer(num: u32) -> IndirectBufferHandle;
     fn bgfx_destroy_indirect_buffer(handle: IndirectBufferHandle);
-    fn bgfx_create_shader(mem: *const Memory ) -> ShaderHandle;
-    fn bgfx_get_shader_uniforms(handle: ShaderHandle, uniforms: *mut UniformHandle, max: u16) -> u16;
+    fn bgfx_create_shader(mem: *const Memory ) -> ShaderHandleImpl;
+    fn bgfx_get_shader_uniforms(handle: ShaderHandleImpl, uniforms: *mut UniformHandle, max: u16) -> u16;
     fn bgfx_get_uniform_info(handle: UniformHandle, info: *mut UniformInfo );
-    fn bgfx_set_shader_name(handle: ShaderHandle, name: *const c_char, len: i32);
-    fn bgfx_destroy_shader(handle: ShaderHandle);
-    fn bgfx_create_program(vsh: ShaderHandle, fsh: ShaderHandle, destroyShaders: bool) -> ProgramHandle;
-    fn bgfx_create_compute_program(csh: ShaderHandle, destroyShaders: bool) -> ProgramHandle;
+    fn bgfx_set_shader_name(handle: ShaderHandleImpl, name: *const c_char, len: i32);
+    fn bgfx_destroy_shader(handle: ShaderHandleImpl);
+    fn bgfx_create_program(vsh: ShaderHandleImpl, fsh: ShaderHandleImpl, destroyShaders: bool) -> ProgramHandle;
+    fn bgfx_create_compute_program(csh: ShaderHandleImpl, destroyShaders: bool) -> ProgramHandle;
     fn bgfx_destroy_program(handle: ProgramHandle);
     fn bgfx_is_texture_valid(depth: u16, cubeMap: bool, num_layers: u16, format: TextureFormat, flags: u32) -> bool;
     fn bgfx_calc_texture_size(info: *mut TextureInfo, width: u16, height: u16, depth: u16, cubeMap: bool, has_mips: bool, num_layers: u16, format: TextureFormat);
@@ -1463,6 +1464,45 @@ impl InstanceDataBuffer {
     }
 }
 
+impl ShaderHandle {
+    pub fn with_memory(mem: &Memory) -> ShaderHandle {
+        unsafe{ShaderHandle{handle:bgfx_create_shader(mem)}}
+    }
+
+    pub fn get_uniform_count(&mut self) -> u16 {
+        unsafe{bgfx_get_shader_uniforms(self.handle, std::ptr::null_mut(), 0) as u16}
+    }
+
+    pub fn get_uniforms(&mut self, maximum: u16) -> Vec<UniformHandle> {
+        let length = if maximum > 0 {
+                std::cmp::min(self.get_uniform_count(), maximum)
+            } else {
+            	maximum
+            };
+
+        let mut items: Vec<UniformHandle> = Vec::with_capacity(length as usize);
+        unsafe {
+            bgfx_get_shader_uniforms(self.handle, items.as_mut_ptr(), length as u16);
+        }
+        return items
+    }
+
+    pub fn set_name(&mut self, name: &str) {
+    	let cstring = CString::new(name).unwrap();
+    	let cstr    = cstring.as_c_str();
+    	let ptr     = cstr.as_ptr();
+        unsafe{bgfx_set_shader_name(self.handle, ptr, cstr.to_bytes().len() as i32)}
+    }
+}
+
+impl Drop for ShaderHandle {
+    fn drop(&mut self) {
+        unsafe{bgfx_destroy_shader(self.handle)}
+    }
+}
+
+//    pub fn get_uniform_info(handle: UniformHandle, info: *mut UniformInfo );
+//        fn bgfx_get_uniform_info(handle: UniformHandle, info: *mut UniformInfo );
 
 // fn bgfx_vertex_pack(input: [c_float; 4], inputNormalized: bool, attr: Attrib, decl: *const VertexDecl, data: *mut c_void, index: u32);
 // fn bgfx_vertex_unpack(output: [c_float; 4], attr: Attrib, decl: *const VertexDecl, data: *const c_void, index: u32);
@@ -1483,13 +1523,8 @@ impl InstanceDataBuffer {
 // fn bgfx_dbg_text_image(x: u16, y: u16, width: u16, height: u16, data: *const c_void, pitch: u16);
 // fn bgfx_create_indirect_buffer(num: u32) -> IndirectBufferHandle;
 // fn bgfx_destroy_indirect_buffer(handle: IndirectBufferHandle);
-// fn bgfx_create_shader(mem: *const Memory ) -> ShaderHandle;
-// fn bgfx_get_shader_uniforms(handle: ShaderHandle, uniforms: *mut UniformHandle, max: u16) -> u16;
-// fn bgfx_get_uniform_info(handle: UniformHandle, info: *mut UniformInfo );
-// fn bgfx_set_shader_name(handle: ShaderHandle, name: *const c_char, len: i32);
-// fn bgfx_destroy_shader(handle: ShaderHandle);
-// fn bgfx_create_program(vsh: ShaderHandle, fsh: ShaderHandle, destroyShaders: bool) -> ProgramHandle;
-// fn bgfx_create_compute_program(csh: ShaderHandle, destroyShaders: bool) -> ProgramHandle;
+// fn bgfx_create_program(vsh: ShaderHandleImpl, fsh: ShaderHandleImpl, destroyShaders: bool) -> ProgramHandle;
+// fn bgfx_create_compute_program(csh: ShaderHandleImpl, destroyShaders: bool) -> ProgramHandle;
 // fn bgfx_destroy_program(handle: ProgramHandle);
 // fn bgfx_is_texture_valid(depth: u16, cubeMap: bool, num_layers: u16, format: TextureFormat, flags: u32) -> bool;
 // fn bgfx_calc_texture_size(info: *mut TextureInfo, width: u16, height: u16, depth: u16, cubeMap: bool, has_mips: bool, num_layers: u16, format: TextureFormat);
