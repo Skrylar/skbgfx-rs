@@ -1224,8 +1224,8 @@ impl TextureHandle3D {
         unsafe { bgfx_update_texture_3d(handle, mip, x, y, z, width, height, depth, mem); }
     }
 
-    pub fn with_memory(width: u16, height: u16, depth: u16, has_mips: bool, format: TextureFormat, flags: u32, mem: &Memory ) -> TextureHandle {
-        unsafe { TextureHandle3D{bgfx_create_texture_3d(width, height, depth, has_mips, format, flags, mem)}}
+    pub fn with_memory(width: u16, height: u16, depth: u16, has_mips: bool, format: TextureFormat, flags: u32, mem: &Memory ) -> TextureHandle3D {
+        unsafe { TextureHandle3D{handle:bgfx_create_texture_3d(width, height, depth, has_mips, format, flags, mem)}}
     }
 
     pub fn read_texture(handle: TextureHandleImpl, data: &mut [u8], mip: u8) -> u32 {
@@ -1263,7 +1263,10 @@ impl TextureHandleCube {
         unsafe { bgfx_update_texture_cube(handle, layer, side, mip, x, y, width, height, mem, pitch); }
     }
 
-// fn bgfx_create_texture_cube(size: u16, has_mips: bool, num_layers: u16, format: TextureFormat, flags: u32, mem: *const Memory ) -> TextureHandleImpl;
+    /// *TODO*: API is subject to change; texture flags to be replaced with a typed bitfield.
+    pub fn with_memory(size: u16, has_mips: bool, num_layers: u16, format: TextureFormat, flags: u32, mem: &Memory ) -> TextureHandleCube {
+        unsafe { TextureHandleCube{handle:bgfx_create_texture_cube(size, has_mips, num_layers, format, flags, mem)}}
+    }
 
     pub fn read_texture(handle: TextureHandleImpl, data: &mut [u8], mip: u8) -> u32 {
         // TODO ensure vector has enough space to receive the texture
