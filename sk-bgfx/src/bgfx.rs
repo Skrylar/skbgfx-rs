@@ -255,7 +255,7 @@ pub type OcclusionQueryHandle = u16;
 pub type ProgramHandle = u16;
 pub type ShaderHandleImpl = u16;
 pub type TextureHandleImpl = u16;
-pub type UniformHandle = u16;
+pub type UniformHandleImpl = u16;
 pub type VertexBufferHandleImpl = u16;
 pub type VertexDeclHandle = u16;
 
@@ -276,6 +276,7 @@ pub struct VertexBufferHandle { handle: VertexBufferHandleImpl }
 pub struct DynamicIndexBufferHandle { handle: DynamicIndexBufferHandleImpl }
 pub struct DynamicVertexBufferHandle { handle: DynamicVertexBufferHandleImpl }
 pub struct ShaderHandle { handle: ShaderHandleImpl }
+pub struct UniformHandle { handle: UniformHandleImpl }
 
 #[repr(C)]
 pub struct Memory {
@@ -627,8 +628,8 @@ extern "C" {
     fn bgfx_create_indirect_buffer(num: u32) -> IndirectBufferHandle;
     fn bgfx_destroy_indirect_buffer(handle: IndirectBufferHandle);
     fn bgfx_create_shader(mem: *const Memory ) -> ShaderHandleImpl;
-    fn bgfx_get_shader_uniforms(handle: ShaderHandleImpl, uniforms: *mut UniformHandle, max: u16) -> u16;
-    fn bgfx_get_uniform_info(handle: UniformHandle, info: *mut UniformInfo );
+    fn bgfx_get_shader_uniforms(handle: ShaderHandleImpl, uniforms: *mut UniformHandleImpl, max: u16) -> u16;
+    fn bgfx_get_uniform_info(handle: UniformHandleImpl, info: *mut UniformInfo );
     fn bgfx_set_shader_name(handle: ShaderHandleImpl, name: *const c_char, len: i32);
     fn bgfx_destroy_shader(handle: ShaderHandleImpl);
     fn bgfx_create_program(vsh: ShaderHandleImpl, fsh: ShaderHandleImpl, destroyShaders: bool) -> ProgramHandle;
@@ -654,8 +655,8 @@ extern "C" {
     fn bgfx_create_frame_buffer_from_nwh(nwh: *mut c_void, width: u16, height: u16, depth_format: TextureFormat) -> FrameBufferHandleImpl;
     fn bgfx_get_texture(handle: FrameBufferHandleImpl, attachment: u8) -> TextureHandleImpl;
     fn bgfx_destroy_frame_buffer(handle: FrameBufferHandleImpl);
-    fn bgfx_create_uniform(name: *const c_char, kind: UniformKind, num: u16) -> UniformHandle;
-    fn bgfx_destroy_uniform(handle: UniformHandle);
+    fn bgfx_create_uniform(name: *const c_char, kind: UniformKind, num: u16) -> UniformHandleImpl;
+    fn bgfx_destroy_uniform(handle: UniformHandleImpl);
     fn bgfx_create_occlusion_query() -> OcclusionQueryHandle;
     fn bgfx_get_result(handle: OcclusionQueryHandle, result: *mut i32) -> OcclusionQueryResult;
     fn bgfx_destroy_occlusion_query(handle: OcclusionQueryHandle);
@@ -681,7 +682,7 @@ extern "C" {
     fn bgfx_set_transform(mtx: *const c_void, num: u16) -> u32;
     fn bgfx_alloc_transform(transform: *mut Transform, num: u16) -> u32;
     fn bgfx_set_transform_cached(cache: u32, num: u16);
-    fn bgfx_set_uniform(handle: UniformHandle, value: *const c_void, num: u16);
+    fn bgfx_set_uniform(handle: UniformHandleImpl, value: *const c_void, num: u16);
     fn bgfx_set_index_buffer(handle: IndexBufferHandleImpl, firstIndex: u32, numIndices: u32);
     fn bgfx_set_dynamic_index_buffer(handle: DynamicIndexBufferHandleImpl, firstIndex: u32, numIndices: u32);
     fn bgfx_set_transient_index_buffer(tib: *const TransientIndexBuffer, firstIndex: u32, numIndices: u32);
@@ -692,7 +693,7 @@ extern "C" {
     fn bgfx_set_instance_data_buffer(idb: *const InstanceDataBuffer, start: u32, num: u32);
     fn bgfx_set_instance_data_from_vertex_buffer(handle: VertexBufferHandleImpl, startVertex: u32, num: u32);
     fn bgfx_set_instance_data_from_dynamic_vertex_buffer(handle: DynamicVertexBufferHandleImpl, startVertex: u32, num: u32);
-    fn bgfx_set_texture(stage: u8, sampler: UniformHandle, handle: TextureHandleImpl, flags: u32);
+    fn bgfx_set_texture(stage: u8, sampler: UniformHandleImpl, handle: TextureHandleImpl, flags: u32);
     fn bgfx_touch(id: ViewId);
     fn bgfx_submit(id: ViewId, handle: ProgramHandle, depth: i32, preserveState: bool);
     fn bgfx_submit_occlusion_query(id: ViewId, program: ProgramHandle, occlusionQuery: OcclusionQueryHandle, depth: i32, preserveState: bool);
@@ -716,7 +717,7 @@ extern "C" {
     fn bgfx_encoder_set_transform(encoder: *mut EncoderImpl, mtx: *const c_void, num: u16) -> u32;
     fn bgfx_encoder_alloc_transform(encoder: *mut EncoderImpl, transform: *mut Transform, num: u16) -> u32;
     fn bgfx_encoder_set_transform_cached(encoder: *mut EncoderImpl, cache: u32, num: u16);
-    fn bgfx_encoder_set_uniform(encoder: *mut EncoderImpl, handle: UniformHandle, value: *const c_void, num: u16);
+    fn bgfx_encoder_set_uniform(encoder: *mut EncoderImpl, handle: UniformHandleImpl, value: *const c_void, num: u16);
     fn bgfx_encoder_set_index_buffer(encoder: *mut EncoderImpl, handle: IndexBufferHandleImpl, firstIndex: u32, numIndices: u32);
     fn bgfx_encoder_set_dynamic_index_buffer(encoder: *mut EncoderImpl, handle: DynamicIndexBufferHandleImpl, firstIndex: u32, numIndices: u32);
     fn bgfx_encoder_set_transient_index_buffer(encoder: *mut EncoderImpl, tib: *const TransientIndexBuffer, firstIndex: u32, numIndices: u32);
@@ -727,7 +728,7 @@ extern "C" {
     fn bgfx_encoder_set_instance_data_buffer(encoder: *mut EncoderImpl, idb: *const InstanceDataBuffer, start: u32, num: u32);
     fn bgfx_encoder_set_instance_data_from_vertex_buffer(encoder: *mut EncoderImpl, handle: VertexBufferHandleImpl, startVertex: u32, num: u32);
     fn bgfx_encoder_set_instance_data_from_dynamic_vertex_buffer(encoder: *mut EncoderImpl, handle: DynamicVertexBufferHandleImpl, startVertex: u32, num: u32);
-    fn bgfx_encoder_set_texture(encoder: *mut EncoderImpl, stage: u8, sampler: UniformHandle, handle: TextureHandleImpl, flags: u32);
+    fn bgfx_encoder_set_texture(encoder: *mut EncoderImpl, stage: u8, sampler: UniformHandleImpl, handle: TextureHandleImpl, flags: u32);
     fn bgfx_encoder_touch(encoder: *mut EncoderImpl, id: ViewId);
     fn bgfx_encoder_submit(encoder: *mut EncoderImpl, id: ViewId, handle: ProgramHandle, depth: i32, preserveState: bool);
     fn bgfx_encoder_submit_occlusion_query(encoder: *mut EncoderImpl, id: ViewId, program: ProgramHandle, occlusionQuery: OcclusionQueryHandle, depth: i32, preserveState: bool);
@@ -837,7 +838,7 @@ impl Encoder {
         unsafe { bgfx_encoder_set_transform_cached(self.handle, cache, num); }
     }
 
-    pub fn set_uniform(&mut self, handle: UniformHandle, value: &c_void, num: u16) {
+    pub fn set_uniform(&mut self, handle: UniformHandleImpl, value: &c_void, num: u16) {
         unsafe { bgfx_encoder_set_uniform(self.handle, handle, value, num); }
     }
 
@@ -881,7 +882,7 @@ impl Encoder {
         unsafe { bgfx_encoder_set_instance_data_from_dynamic_vertex_buffer(self.handle, handle, start_vertex, num); }
     }
 
-    pub fn set_texture(&mut self, stage: u8, sampler: UniformHandle, handle: TextureHandleImpl, flags: u32) {
+    pub fn set_texture(&mut self, stage: u8, sampler: UniformHandleImpl, handle: TextureHandleImpl, flags: u32) {
         unsafe { bgfx_encoder_set_texture(self.handle, stage, sampler, handle, flags); }
     }
 
@@ -1047,7 +1048,7 @@ pub fn set_transform_cached(cache: u32, num: u16) {
     unsafe { bgfx_set_transform_cached(cache, num); }
 }
 
-pub fn set_uniform(handle: UniformHandle, value: &c_void, num: u16) {
+pub fn set_uniform(handle: UniformHandleImpl, value: &c_void, num: u16) {
     unsafe { bgfx_set_uniform(handle, value, num); }
 }
 
@@ -1091,7 +1092,7 @@ pub fn set_instance_data_from_dynamic_vertex_buffer(handle: DynamicVertexBufferH
     unsafe { bgfx_set_instance_data_from_dynamic_vertex_buffer(handle, start_vertex, num); }
 }
 
-pub fn set_texture(stage: u8, sampler: UniformHandle, handle: TextureHandleImpl, flags: u32) {
+pub fn set_texture(stage: u8, sampler: UniformHandleImpl, handle: TextureHandleImpl, flags: u32) {
     unsafe { bgfx_set_texture(stage, sampler, handle, flags); }
 }
 
@@ -1223,6 +1224,10 @@ impl TextureHandle3D {
         unsafe { bgfx_update_texture_3d(handle, mip, x, y, z, width, height, depth, mem); }
     }
 
+    pub fn with_memory(width: u16, height: u16, depth: u16, has_mips: bool, format: TextureFormat, flags: u32, mem: &Memory ) -> TextureHandle {
+        unsafe { TextureHandle3D{bgfx_create_texture_3d(width, height, depth, has_mips, format, flags, mem)}}
+    }
+
     pub fn read_texture(handle: TextureHandleImpl, data: &mut [u8], mip: u8) -> u32 {
         // TODO ensure vector has enough space to receive the texture
         unsafe { bgfx_read_texture(handle, transmute(data.as_mut_ptr()), mip) }
@@ -1257,6 +1262,8 @@ impl TextureHandleCube {
     pub fn update_cube(handle: TextureHandleImpl, layer: u16, side: u8, mip: u8, x: u16, y: u16, width: u16, height: u16, mem: &Memory, pitch: u16) {
         unsafe { bgfx_update_texture_cube(handle, layer, side, mip, x, y, width, height, mem, pitch); }
     }
+
+// fn bgfx_create_texture_cube(size: u16, has_mips: bool, num_layers: u16, format: TextureFormat, flags: u32, mem: *const Memory ) -> TextureHandleImpl;
 
     pub fn read_texture(handle: TextureHandleImpl, data: &mut [u8], mip: u8) -> u32 {
         // TODO ensure vector has enough space to receive the texture
@@ -1296,16 +1303,16 @@ pub fn get_renderer_type() -> RendererKind {
     unsafe { bgfx_get_renderer_type() }
 }
 
-pub fn get_avail_transient_index_buffer(num: u32) -> u32 {
-    unsafe { bgfx_get_avail_transient_index_buffer(num) }
+pub fn get_avail_transient_index_buffer(len: u32) -> u32 {
+    unsafe { bgfx_get_avail_transient_index_buffer(len) }
 }
 
-pub fn get_avail_transient_vertex_buffer(num: u32, decl: &VertexDecl) -> u32 {
-    unsafe { bgfx_get_avail_transient_vertex_buffer(num, decl) }
+pub fn get_avail_transient_vertex_buffer(len: u32, decl: &VertexDecl) -> u32 {
+    unsafe { bgfx_get_avail_transient_vertex_buffer(len, decl) }
 }
 
-pub fn get_avail_instance_data_buffer(num: u32, stride: u16) -> u32 {
-    unsafe { bgfx_get_avail_instance_data_buffer(num, stride) }
+pub fn get_avail_instance_data_buffer(len: u32, stride: u16) -> u32 {
+    unsafe { bgfx_get_avail_instance_data_buffer(len, stride) }
 }
 
 impl FrameBufferHandle {
@@ -1473,14 +1480,14 @@ impl ShaderHandle {
         unsafe{bgfx_get_shader_uniforms(self.handle, std::ptr::null_mut(), 0) as u16}
     }
 
-    pub fn get_uniforms(&mut self, maximum: u16) -> Vec<UniformHandle> {
+    pub fn get_uniforms(&mut self, maximum: u16) -> Vec<UniformHandleImpl> {
         let length = if maximum > 0 {
                 std::cmp::min(self.get_uniform_count(), maximum)
             } else {
             	maximum
             };
 
-        let mut items: Vec<UniformHandle> = Vec::with_capacity(length as usize);
+        let mut items: Vec<UniformHandleImpl> = Vec::with_capacity(length as usize);
         unsafe {
             bgfx_get_shader_uniforms(self.handle, items.as_mut_ptr(), length as u16);
         }
@@ -1501,8 +1508,17 @@ impl Drop for ShaderHandle {
     }
 }
 
-//    pub fn get_uniform_info(handle: UniformHandle, info: *mut UniformInfo );
-//        fn bgfx_get_uniform_info(handle: UniformHandle, info: *mut UniformInfo );
+impl UniformHandle {
+// fn bgfx_create_uniform(name: *const c_char, kind: UniformKind, num: u16) -> UniformHandleImpl;
+//    pub fn get_uniform_info(handle: UniformHandleImpl, info: *mut UniformInfo );
+//        fn bgfx_get_uniform_info(handle: UniformHandleImpl, info: *mut UniformInfo );
+}
+
+impl Drop for UniformHandle {
+    fn drop(&mut self) {
+        unsafe{bgfx_destroy_uniform(self.handle)}
+    }
+}
 
 // fn bgfx_vertex_pack(input: [c_float; 4], inputNormalized: bool, attr: Attrib, decl: *const VertexDecl, data: *mut c_void, index: u32);
 // fn bgfx_vertex_unpack(output: [c_float; 4], attr: Attrib, decl: *const VertexDecl, data: *const c_void, index: u32);
@@ -1529,11 +1545,7 @@ impl Drop for ShaderHandle {
 // fn bgfx_is_texture_valid(depth: u16, cubeMap: bool, num_layers: u16, format: TextureFormat, flags: u32) -> bool;
 // fn bgfx_calc_texture_size(info: *mut TextureInfo, width: u16, height: u16, depth: u16, cubeMap: bool, has_mips: bool, num_layers: u16, format: TextureFormat);
 // fn bgfx_create_texture(mem: *const Memory, flags: u32, skip: u8, info: *mut TextureInfo ) -> TextureHandleImpl;
-// fn bgfx_create_texture_3d(width: u16, height: u16, depth: u16, has_mips: bool, format: TextureFormat, flags: u32, mem: *const Memory ) -> TextureHandleImpl;
-// fn bgfx_create_texture_cube(size: u16, has_mips: bool, num_layers: u16, format: TextureFormat, flags: u32, mem: *const Memory ) -> TextureHandleImpl;
 // fn bgfx_get_texture(handle: FrameBufferHandleImpl, attachment: u8) -> TextureHandleImpl;
-// fn bgfx_create_uniform(name: *const c_char, kind: UniformKind, num: u16) -> UniformHandle;
-// fn bgfx_destroy_uniform(handle: UniformHandle);
 // fn bgfx_create_occlusion_query() -> OcclusionQueryHandle;
 // fn bgfx_get_result(handle: OcclusionQueryHandle, result: *mut i32) -> OcclusionQueryResult;
 // fn bgfx_destroy_occlusion_query(handle: OcclusionQueryHandle);
