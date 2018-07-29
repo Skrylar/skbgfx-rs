@@ -633,13 +633,13 @@ extern "C" {
     fn bgfx_create_program(vsh: ShaderHandle, fsh: ShaderHandle, destroyShaders: bool) -> ProgramHandle;
     fn bgfx_create_compute_program(csh: ShaderHandle, destroyShaders: bool) -> ProgramHandle;
     fn bgfx_destroy_program(handle: ProgramHandle);
-    fn bgfx_is_texture_valid(depth: u16, cubeMap: bool, numLayers: u16, format: TextureFormat, flags: u32) -> bool;
-    fn bgfx_calc_texture_size(info: *mut TextureInfo, width: u16, height: u16, depth: u16, cubeMap: bool, hasMips: bool, numLayers: u16, format: TextureFormat);
+    fn bgfx_is_texture_valid(depth: u16, cubeMap: bool, num_layers: u16, format: TextureFormat, flags: u32) -> bool;
+    fn bgfx_calc_texture_size(info: *mut TextureInfo, width: u16, height: u16, depth: u16, cubeMap: bool, has_mips: bool, num_layers: u16, format: TextureFormat);
     fn bgfx_create_texture(mem: *const Memory, flags: u32, skip: u8, info: *mut TextureInfo ) -> TextureHandleImpl;
-    fn bgfx_create_texture_2d(width: u16, height: u16, hasMips: bool, numLayers: u16, format: TextureFormat, flags: u32, mem: *const Memory ) -> TextureHandleImpl;
-    fn bgfx_create_texture_2d_scaled(ratio: BackbufferRatio, hasMips: bool, numLayers: u16, format: TextureFormat, flags: u32) -> TextureHandleImpl;
-    fn bgfx_create_texture_3d(width: u16, height: u16, depth: u16, hasMips: bool, format: TextureFormat, flags: u32, mem: *const Memory ) -> TextureHandleImpl;
-    fn bgfx_create_texture_cube(size: u16, hasMips: bool, numLayers: u16, format: TextureFormat, flags: u32, mem: *const Memory ) -> TextureHandleImpl;
+    fn bgfx_create_texture_2d(width: u16, height: u16, has_mips: bool, num_layers: u16, format: TextureFormat, flags: u32, mem: *const Memory ) -> TextureHandleImpl;
+    fn bgfx_create_texture_2d_scaled(ratio: BackbufferRatio, has_mips: bool, num_layers: u16, format: TextureFormat, flags: u32) -> TextureHandleImpl;
+    fn bgfx_create_texture_3d(width: u16, height: u16, depth: u16, has_mips: bool, format: TextureFormat, flags: u32, mem: *const Memory ) -> TextureHandleImpl;
+    fn bgfx_create_texture_cube(size: u16, has_mips: bool, num_layers: u16, format: TextureFormat, flags: u32, mem: *const Memory ) -> TextureHandleImpl;
     fn bgfx_update_texture_2d(handle: TextureHandleImpl, layer: u16, mip: u8, x: u16, y: u16, width: u16, height: u16, mem: *const Memory, pitch: u16);
     fn bgfx_update_texture_3d(handle: TextureHandleImpl, mip: u8, x: u16, y: u16, z: u16, width: u16, height: u16, depth: u16, mem: *const Memory );
     fn bgfx_update_texture_cube(handle: TextureHandleImpl, layer: u16, side: u8, mip: u8, x: u16, y: u16, width: u16, height: u16, mem: *const Memory, pitch: u16);
@@ -1173,8 +1173,13 @@ pub fn frame(capture: bool) -> u32 {
 //---------------------------------------------------------------------
 
 impl TextureHandle2D {
-    pub fn update(handle: TextureHandleImpl, layer: u16, mip: u8, x: u16, y: u16, width: u16, height: u16, mem: &Memory, pitch: u16) {
-        unsafe { bgfx_update_texture_2d(handle, layer, mip, x, y, width, height, mem, pitch); }
+    /// *TODO*: API is subject to change; texture flags to be replaced with a typed bitfield.
+    pub fn with_memory(width: u16, height: u16, has_mips: bool, num_layers: u16, format: TextureFormat, flags: u32, mem: &Memory) -> TextureHandle2D {
+        unsafe{TextureHandle2D{handle:bgfx_create_texture_2d(width, height, has_mips, num_layers, format, flags, mem)}}
+    }
+
+    pub fn update(&mut self, layer: u16, mip: u8, x: u16, y: u16, width: u16, height: u16, mem: &Memory, pitch: u16) {
+        unsafe { bgfx_update_texture_2d(self.handle, layer, mip, x, y, width, height, mem, pitch); }
     }
 
     pub fn read_texture(handle: TextureHandleImpl, data: &mut [u8], mip: u8) -> u32 {
@@ -1481,13 +1486,12 @@ impl InstanceDataBuffer {
 // fn bgfx_create_program(vsh: ShaderHandle, fsh: ShaderHandle, destroyShaders: bool) -> ProgramHandle;
 // fn bgfx_create_compute_program(csh: ShaderHandle, destroyShaders: bool) -> ProgramHandle;
 // fn bgfx_destroy_program(handle: ProgramHandle);
-// fn bgfx_is_texture_valid(depth: u16, cubeMap: bool, numLayers: u16, format: TextureFormat, flags: u32) -> bool;
-// fn bgfx_calc_texture_size(info: *mut TextureInfo, width: u16, height: u16, depth: u16, cubeMap: bool, hasMips: bool, numLayers: u16, format: TextureFormat);
+// fn bgfx_is_texture_valid(depth: u16, cubeMap: bool, num_layers: u16, format: TextureFormat, flags: u32) -> bool;
+// fn bgfx_calc_texture_size(info: *mut TextureInfo, width: u16, height: u16, depth: u16, cubeMap: bool, has_mips: bool, num_layers: u16, format: TextureFormat);
 // fn bgfx_create_texture(mem: *const Memory, flags: u32, skip: u8, info: *mut TextureInfo ) -> TextureHandleImpl;
-// fn bgfx_create_texture_2d(width: u16, height: u16, hasMips: bool, numLayers: u16, format: TextureFormat, flags: u32, mem: *const Memory ) -> TextureHandleImpl;
-// fn bgfx_create_texture_2d_scaled(ratio: BackbufferRatio, hasMips: bool, numLayers: u16, format: TextureFormat, flags: u32) -> TextureHandleImpl;
-// fn bgfx_create_texture_3d(width: u16, height: u16, depth: u16, hasMips: bool, format: TextureFormat, flags: u32, mem: *const Memory ) -> TextureHandleImpl;
-// fn bgfx_create_texture_cube(size: u16, hasMips: bool, numLayers: u16, format: TextureFormat, flags: u32, mem: *const Memory ) -> TextureHandleImpl;
+// fn bgfx_create_texture_2d_scaled(ratio: BackbufferRatio, has_mips: bool, num_layers: u16, format: TextureFormat, flags: u32) -> TextureHandleImpl;
+// fn bgfx_create_texture_3d(width: u16, height: u16, depth: u16, has_mips: bool, format: TextureFormat, flags: u32, mem: *const Memory ) -> TextureHandleImpl;
+// fn bgfx_create_texture_cube(size: u16, has_mips: bool, num_layers: u16, format: TextureFormat, flags: u32, mem: *const Memory ) -> TextureHandleImpl;
 // fn bgfx_get_texture(handle: FrameBufferHandleImpl, attachment: u8) -> TextureHandleImpl;
 // fn bgfx_create_uniform(name: *const c_char, kind: UniformKind, num: u16) -> UniformHandle;
 // fn bgfx_destroy_uniform(handle: UniformHandle);
