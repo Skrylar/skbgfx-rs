@@ -624,16 +624,12 @@ extern "C" {
                                , decl: *const VertexDecl, flags: u16) -> VertexBufferHandleImpl;
     fn bgfx_destroy_vertex_buffer(handle: VertexBufferHandleImpl);
     fn bgfx_create_dynamic_index_buffer(num: u32, flags: u16) -> DynamicIndexBufferHandleImpl;
-    fn bgfx_create_dynamic_index_buffer_mem(mem: *const MemoryImpl
-                                          , flags: u16) -> DynamicIndexBufferHandleImpl;
-    fn bgfx_update_dynamic_index_buffer(handle: DynamicIndexBufferHandleImpl, startIndex: u32, mem: *const MemoryImpl
-                                      );
+    fn bgfx_create_dynamic_index_buffer_mem(mem: *const MemoryImpl, flags: u16) -> DynamicIndexBufferHandleImpl;
+    fn bgfx_update_dynamic_index_buffer(handle: DynamicIndexBufferHandleImpl, startIndex: u32, mem: *const MemoryImpl);
     fn bgfx_destroy_dynamic_index_buffer(handle: DynamicIndexBufferHandleImpl);
     fn bgfx_create_dynamic_vertex_buffer(num: u32, decl: *const VertexDecl, flags: u16) -> DynamicVertexBufferHandleImpl;
-    fn bgfx_create_dynamic_vertex_buffer_mem(mem: *const MemoryImpl
-                                           , decl: *const VertexDecl, flags: u16) -> DynamicVertexBufferHandleImpl;
-    fn bgfx_update_dynamic_vertex_buffer(handle: DynamicVertexBufferHandleImpl, startVertex: u32, mem: *const MemoryImpl
-                                       );
+    fn bgfx_create_dynamic_vertex_buffer_mem(mem: *const MemoryImpl, decl: *const VertexDecl, flags: u16) -> DynamicVertexBufferHandleImpl;
+    fn bgfx_update_dynamic_vertex_buffer(handle: DynamicVertexBufferHandleImpl, startVertex: u32, mem: *const MemoryImpl);
     fn bgfx_destroy_dynamic_vertex_buffer(handle: DynamicVertexBufferHandleImpl);
     fn bgfx_get_avail_transient_index_buffer(num: u32) -> u32;
     fn bgfx_get_avail_transient_vertex_buffer(num: u32, decl: *const VertexDecl) -> u32;
@@ -644,8 +640,7 @@ extern "C" {
     fn bgfx_alloc_instance_data_buffer(idb: *mut InstanceDataBuffer, num: u32, stride: u16);
     fn bgfx_create_indirect_buffer(num: u32) -> IndirectBufferHandleImpl;
     fn bgfx_destroy_indirect_buffer(handle: IndirectBufferHandleImpl);
-    fn bgfx_create_shader(mem: *const MemoryImpl
-                        ) -> ShaderHandleImpl;
+    fn bgfx_create_shader(mem: *const MemoryImpl) -> ShaderHandleImpl;
     fn bgfx_get_shader_uniforms(handle: ShaderHandleImpl, uniforms: *mut UniformHandleImpl, max: u16) -> u16;
     fn bgfx_get_uniform_info(handle: UniformHandleImpl, info: *mut UniformInfo );
     fn bgfx_set_shader_name(handle: ShaderHandleImpl, name: *const c_char, len: i32);
@@ -655,21 +650,14 @@ extern "C" {
     fn bgfx_destroy_program(handle: ProgramHandleImpl);
     fn bgfx_is_texture_valid(depth: u16, cube_map: bool, num_layers: u16, format: TextureFormat, flags: u32) -> bool;
     fn bgfx_calc_texture_size(info: *mut TextureInfo, width: u16, height: u16, depth: u16, cube_map: bool, has_mips: bool, num_layers: u16, format: TextureFormat);
-    fn bgfx_create_texture(mem: *const MemoryImpl
-                         , flags: u32, skip: u8, info: *mut TextureInfo ) -> TextureHandleImpl;
-    fn bgfx_create_texture_2d(width: u16, height: u16, has_mips: bool, num_layers: u16, format: TextureFormat, flags: u32, mem: *const MemoryImpl
-                            ) -> TextureHandleImpl;
+    fn bgfx_create_texture(mem: *const MemoryImpl, flags: u32, skip: u8, info: *mut TextureInfo) -> TextureHandleImpl;
+    fn bgfx_create_texture_2d(width: u16, height: u16, has_mips: bool, num_layers: u16, format: TextureFormat, flags: u32, mem: *const MemoryImpl) -> TextureHandleImpl;
     fn bgfx_create_texture_2d_scaled(ratio: BackbufferRatio, has_mips: bool, num_layers: u16, format: TextureFormat, flags: u32) -> TextureHandleImpl;
-    fn bgfx_create_texture_3d(width: u16, height: u16, depth: u16, has_mips: bool, format: TextureFormat, flags: u32, mem: *const MemoryImpl
-                            ) -> TextureHandleImpl;
-    fn bgfx_create_texture_cube(size: u16, has_mips: bool, num_layers: u16, format: TextureFormat, flags: u32, mem: *const MemoryImpl
-                              ) -> TextureHandleImpl;
-    fn bgfx_update_texture_2d(handle: TextureHandleImpl, layer: u16, mip: u8, x: u16, y: u16, width: u16, height: u16, mem: *const MemoryImpl
-                            , pitch: u16);
-    fn bgfx_update_texture_3d(handle: TextureHandleImpl, mip: u8, x: u16, y: u16, z: u16, width: u16, height: u16, depth: u16, mem: *const MemoryImpl
-                            );
-    fn bgfx_update_texture_cube(handle: TextureHandleImpl, layer: u16, side: u8, mip: u8, x: u16, y: u16, width: u16, height: u16, mem: *const MemoryImpl
-                              , pitch: u16);
+    fn bgfx_create_texture_3d(width: u16, height: u16, depth: u16, has_mips: bool, format: TextureFormat, flags: u32, mem: *const MemoryImpl) -> TextureHandleImpl;
+    fn bgfx_create_texture_cube(size: u16, has_mips: bool, num_layers: u16, format: TextureFormat, flags: u32, mem: *const MemoryImpl) -> TextureHandleImpl;
+    fn bgfx_update_texture_2d(handle: TextureHandleImpl, layer: u16, mip: u8, x: u16, y: u16, width: u16, height: u16, mem: *const MemoryImpl, pitch: u16);
+    fn bgfx_update_texture_3d(handle: TextureHandleImpl, mip: u8, x: u16, y: u16, z: u16, width: u16, height: u16, depth: u16, mem: *const MemoryImpl);
+    fn bgfx_update_texture_cube(handle: TextureHandleImpl, layer: u16, side: u8, mip: u8, x: u16, y: u16, width: u16, height: u16, mem: *const MemoryImpl, pitch: u16);
     fn bgfx_read_texture(handle: TextureHandleImpl, data: *mut c_void, mip: u8) -> u32;
     fn bgfx_set_texture_name(handle: TextureHandleImpl, name: *const c_char, len: i32);
     fn bgfx_destroy_texture(handle: TextureHandleImpl);
@@ -1201,8 +1189,7 @@ pub fn frame(capture: bool) -> u32 {
 
 impl TextureHandle2D {
     /// *TODO*: API is subject to change; texture flags to be replaced with a typed bitfield.
-    pub fn with_memory(width: u16, height: u16, has_mips: bool, num_layers: u16, format: TextureFormat, flags: u32, mem: &MemoryImpl
-                     ) -> TextureHandle2D {
+    pub fn with_memory(width: u16, height: u16, has_mips: bool, num_layers: u16, format: TextureFormat, flags: u32, mem: &MemoryImpl) -> TextureHandle2D {
         unsafe{TextureHandle2D{handle:bgfx_create_texture_2d(width, height, has_mips, num_layers, format, flags, mem)}}
     }
 
@@ -1211,8 +1198,7 @@ impl TextureHandle2D {
         unsafe{TextureHandle2D{handle:bgfx_create_texture_2d_scaled(ratio, has_mips, num_layers, format, flags)}}
     }
 
-    pub fn update(&mut self, layer: u16, mip: u8, x: u16, y: u16, width: u16, height: u16, mem: &MemoryImpl
-                , pitch: u16) {
+    pub fn update(&mut self, layer: u16, mip: u8, x: u16, y: u16, width: u16, height: u16, mem: &MemoryImpl, pitch: u16) {
         unsafe { bgfx_update_texture_2d(self.handle, layer, mip, x, y, width, height, mem, pitch); }
     }
 
@@ -1247,14 +1233,12 @@ impl Drop for TextureHandle2D {
 //---------------------------------------------------------------------
 
 impl TextureHandle3D {
-    pub fn update(handle: TextureHandleImpl, mip: u8, x: u16, y: u16, z: u16, width: u16, height: u16, depth: u16, mem: &MemoryImpl
-                ) {
-        unsafe { bgfx_update_texture_3d(handle, mip, x, y, z, width, height, depth, mem); }
+    pub fn update(handle: TextureHandleImpl, mip: u8, x: u16, y: u16, z: u16, width: u16, height: u16, depth: u16, mem: &Memory) {
+        unsafe { bgfx_update_texture_3d(handle, mip, x, y, z, width, height, depth, mem.handle); }
     }
 
-    pub fn with_memory(width: u16, height: u16, depth: u16, has_mips: bool, format: TextureFormat, flags: u32, mem: &MemoryImpl
-                     ) -> TextureHandle3D {
-        unsafe { TextureHandle3D{handle:bgfx_create_texture_3d(width, height, depth, has_mips, format, flags, mem)}}
+    pub fn with_memory(width: u16, height: u16, depth: u16, has_mips: bool, format: TextureFormat, flags: u32, mem: &Memory) -> TextureHandle3D {
+        unsafe { TextureHandle3D{handle:bgfx_create_texture_3d(width, height, depth, has_mips, format, flags, mem.handle)}}
     }
 
     pub fn read_texture(handle: TextureHandleImpl, data: &mut [u8], mip: u8) -> u32 {
@@ -1288,15 +1272,13 @@ impl Drop for TextureHandle3D {
 //---------------------------------------------------------------------
 
 impl TextureHandleCube {
-    pub fn update_cube(handle: TextureHandleImpl, layer: u16, side: u8, mip: u8, x: u16, y: u16, width: u16, height: u16, mem: &MemoryImpl
-                     , pitch: u16) {
-        unsafe { bgfx_update_texture_cube(handle, layer, side, mip, x, y, width, height, mem, pitch); }
+    pub fn update_cube(handle: TextureHandleImpl, layer: u16, side: u8, mip: u8, x: u16, y: u16, width: u16, height: u16, mem: &Memory, pitch: u16) {
+        unsafe { bgfx_update_texture_cube(handle, layer, side, mip, x, y, width, height, mem.handle, pitch); }
     }
 
     /// *TODO*: API is subject to change; texture flags to be replaced with a typed bitfield.
-    pub fn with_memory(size: u16, has_mips: bool, num_layers: u16, format: TextureFormat, flags: u32, mem: &MemoryImpl
-                     ) -> TextureHandleCube {
-        unsafe { TextureHandleCube{handle:bgfx_create_texture_cube(size, has_mips, num_layers, format, flags, mem)}}
+    pub fn with_memory(size: u16, has_mips: bool, num_layers: u16, format: TextureFormat, flags: u32, mem: &Memory) -> TextureHandleCube {
+        unsafe { TextureHandleCube{handle:bgfx_create_texture_cube(size, has_mips, num_layers, format, flags, mem.handle)}}
     }
 
     pub fn read_texture(handle: TextureHandleImpl, data: &mut [u8], mip: u8) -> u32 {
@@ -1406,9 +1388,8 @@ impl Drop for FrameBufferHandle {
 
 impl IndexBufferHandle {
     /// *TODO*: API is subject to change; flags to be replaced with a typed bitfield.
-    pub fn bgfx_create_index_buffer(mem: &MemoryImpl
-                                  , flags: u16) -> IndexBufferHandle {
-        unsafe {IndexBufferHandle{handle:bgfx_create_index_buffer(mem, flags)}}
+    pub fn bgfx_create_index_buffer(mem: &Memory, flags: u16) -> IndexBufferHandle {
+        unsafe {IndexBufferHandle{handle:bgfx_create_index_buffer(mem.handle, flags)}}
     }
 }
 
@@ -1420,9 +1401,8 @@ impl Drop for IndexBufferHandle {
 
 impl VertexBufferHandle {
     /// *TODO*: API is subject to change; flags to be replaced with a typed bitfield.
-    pub fn from_memory(mem: &MemoryImpl
-                     , decl: &VertexDecl, flags: u16) -> VertexBufferHandle {
-        unsafe { VertexBufferHandle{handle:bgfx_create_vertex_buffer(mem, decl, flags)}}
+    pub fn from_memory(mem: &MemoryImpl, decl: &VertexDecl, flags: u16) -> VertexBufferHandle {
+        unsafe { VertexBufferHandle{handle:bgfx_create_vertex_buffer(mem.handle, decl, flags)}}
     }
 }
 
@@ -1439,14 +1419,12 @@ impl DynamicIndexBufferHandle {
     }
 
     /// *TODO*: API is subject to change; flags to be replaced with a typed bitfield.
-    pub fn with_memory(mem: &MemoryImpl
-                     , flags: u16) -> DynamicIndexBufferHandle {
-        unsafe { DynamicIndexBufferHandle{handle: bgfx_create_dynamic_index_buffer_mem(mem, flags)}}
+    pub fn with_memory(mem: &Memory, flags: u16) -> DynamicIndexBufferHandle {
+        unsafe { DynamicIndexBufferHandle{handle: bgfx_create_dynamic_index_buffer_mem(mem.handle, flags)}}
     }
 
-    pub fn update(&mut self, start_index: u32, mem: &MemoryImpl
-                ) {
-        unsafe { bgfx_update_dynamic_index_buffer(self.handle, start_index, mem) }
+    pub fn update(&mut self, start_index: u32, mem: &Memory) {
+        unsafe { bgfx_update_dynamic_index_buffer(self.handle, start_index, mem.handle) }
     }
 }
 
@@ -1463,14 +1441,12 @@ impl DynamicVertexBufferHandle {
     }
 
     /// *TODO*: API is subject to change; flags to be replaced with a typed bitfield.
-    pub fn with_memory(mem: &MemoryImpl
-                     , decl: &VertexDecl, flags: u16) -> DynamicVertexBufferHandle {
-        unsafe {DynamicVertexBufferHandle{handle:bgfx_create_dynamic_vertex_buffer_mem(mem, decl, flags)}}
+    pub fn with_memory(mem: &Memory, decl: &VertexDecl, flags: u16) -> DynamicVertexBufferHandle {
+        unsafe {DynamicVertexBufferHandle{handle:bgfx_create_dynamic_vertex_buffer_mem(mem.handle, decl, flags)}}
     }
 
-    pub fn update(&self, start_vertex: u32, mem: &MemoryImpl
-                ) {
-        unsafe {bgfx_update_dynamic_vertex_buffer(self.handle, start_vertex, mem)}
+    pub fn update(&self, start_vertex: u32, mem: &Memory) {
+        unsafe {bgfx_update_dynamic_vertex_buffer(self.handle, start_vertex, mem.handle)}
     }
 }
 
@@ -1512,9 +1488,8 @@ impl InstanceDataBuffer {
 }
 
 impl ShaderHandle {
-    pub fn with_memory(mem: &MemoryImpl
-                     ) -> ShaderHandle {
-        unsafe{ShaderHandle{handle:bgfx_create_shader(mem)}}
+    pub fn with_memory(mem: &Memory) -> ShaderHandle {
+        unsafe{ShaderHandle{handle:bgfx_create_shader(mem.handle)}}
     }
 
     pub fn get_uniform_count(&mut self) -> u16 {
@@ -1711,7 +1686,7 @@ pub fn get_stats() -> &'static Stats {
     unsafe{transmute(bgfx_get_stats())}
 }
 
-impl MemoryImpl{
+impl Memory{
     /// Allocates new memory in C space. Data will be freed inside
     /// bgfx.
     pub fn alloc(size: u32) -> Memory {
