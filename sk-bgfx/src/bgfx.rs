@@ -1665,12 +1665,19 @@ pub fn topology_sort_tri_list(sort: TopologySort, dst: &mut [u8], dir: [c_float;
     unsafe{bgfx_topology_sort_tri_list(sort, transmute(ptr1), dst.len() as u32, dir, pos, transmute(ptr2), stride, transmute(ptr3), indices.len() as u32, false)}
 }
 
+// XXX yes, bgfx itself asserts these are static lifetime structs
+// TODO test that these transmutes actually work as expected
 
+pub fn get_caps() -> &'static Caps {
+    unsafe {transmute(bgfx_get_caps())}
+}
 
+pub fn get_stats() -> &'static Stats {
+    unsafe{transmute(bgfx_get_stats())}
+}
 
-// fn bgfx_get_caps() -> *const Caps;
-// fn bgfx_get_stats() -> *const Stats;
 // fn bgfx_alloc(size: u32) -> *const Memory;
 // fn bgfx_copy(data: *const c_void, size: u32) -> *const Memory;
 // fn bgfx_make_ref(data: *const c_void, size: u32) -> *const Memory;
 // fn bgfx_make_ref_release(data: *const c_void, size: u32, releaseFn: ReleaseFn, userData: *mut c_void) -> *const Memory;
+//
