@@ -1401,7 +1401,7 @@ impl Drop for IndexBufferHandle {
 
 impl VertexBufferHandle {
     /// *TODO*: API is subject to change; flags to be replaced with a typed bitfield.
-    pub fn from_memory(mem: &MemoryImpl, decl: &VertexDecl, flags: u16) -> VertexBufferHandle {
+    pub fn from_memory(mem: &Memory, decl: &VertexDecl, flags: u16) -> VertexBufferHandle {
         unsafe { VertexBufferHandle{handle:bgfx_create_vertex_buffer(mem.handle, decl, flags)}}
     }
 }
