@@ -1523,6 +1523,32 @@ impl Drop for UniformHandle {
     }
 }
 
+/// *TODO*: Replace `attr` with a hard type.
+pub fn debug_text_clear(attr: u8, small: bool) {
+    unsafe {bgfx_dbg_text_clear(attr, small)}
+}
+
+/// Sends a request to print text throuhg the on-screen debugging
+/// facilities. While the C-side accepts variadic arguments and a
+/// formatting parameters, the Rust side only accepts a string. Use
+/// a Rust native formatting facility to prepare your string.
+/// *TODO*: Replace `attr` with a hard type.
+pub fn debug_text_print(x: u16, y: u16, attr: u8, text: &str) {
+    unsafe {
+        let format  = CStr::from_ptr("%\0".as_ptr() as *const i8);
+        let cstring = CString::new(text).unwrap();
+        let ptr     = cstring.as_ptr();
+
+        bgfx_dbg_text_printf(x, y, attr, format.as_ptr(), ptr)
+    }
+}
+
+pub unsafe fn debug_text_image(x: u16, y: u16, width: u16, height: u16, data: &[u8], pitch: u16) {
+    // TODO check that slice is large enough to hold image
+    let ptr = data.as_ptr();
+    bgfx_dbg_text_image(x, y, width, height, transmute(ptr), pitch)
+}
+
 // fn bgfx_vertex_pack(input: [c_float; 4], inputNormalized: bool, attr: Attrib, decl: *const VertexDecl, data: *mut c_void, index: u32);
 // fn bgfx_vertex_unpack(output: [c_float; 4], attr: Attrib, decl: *const VertexDecl, data: *const c_void, index: u32);
 // fn bgfx_vertex_convert(destDecl: *const VertexDecl, destData: *mut c_void, srcDecl: *const VertexDecl, srcData: *const c_void, num: u32);
@@ -1536,10 +1562,6 @@ impl Drop for UniformHandle {
 // fn bgfx_make_ref(data: *const c_void, size: u32) -> *const Memory;
 // fn bgfx_make_ref_release(data: *const c_void, size: u32, releaseFn: ReleaseFn, userData: *mut c_void) -> *const Memory;
 // fn bgfx_set_debug(debug: u32);
-// fn bgfx_dbg_text_clear(attr: u8, small: bool);
-// fn bgfx_dbg_text_printf(x: u16, y: u16, attr: u8, format: *const c_char, ... );
-// fn bgfx_dbg_text_vprintf(x: u16, y: u16, attr: u8, format: *const c_char, argList: VaList);
-// fn bgfx_dbg_text_image(x: u16, y: u16, width: u16, height: u16, data: *const c_void, pitch: u16);
 // fn bgfx_create_indirect_buffer(num: u32) -> IndirectBufferHandle;
 // fn bgfx_destroy_indirect_buffer(handle: IndirectBufferHandle);
 // fn bgfx_create_program(vsh: ShaderHandleImpl, fsh: ShaderHandleImpl, destroyShaders: bool) -> ProgramHandle;
