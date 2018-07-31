@@ -1639,10 +1639,35 @@ pub fn vertex_convert(dest_decl: &VertexDecl, dest_data: &mut [u8], src_decl: &V
     unsafe{bgfx_vertex_convert(dest_decl, transmute(ptr1), src_decl, transmute(ptr2), num)}
 }
 
+pub fn weld_vertices(output: &mut [u16], decl: &VertexDecl, data: &[u8], len: u16, epsilon: f32) -> u16 {
+    if (len as usize) < output.len() { panic!("Output index vector must be at least as large as `len`.") }
+    let ptr = data.as_ptr();
+    unsafe{bgfx_weld_vertices(output.as_mut_ptr(), decl, transmute(ptr), len, epsilon as c_float)}
+}
 
-// fn bgfx_weld_vertices(output: *mut u16, decl: *const VertexDecl, data: *const c_void, num: u16, epsilon: c_float) -> u16;
-// fn bgfx_topology_convert(conversion: TopologyConvert, dst: *mut c_void, dstSize: u32, indices: *const c_void, numIndices: u32, index32: bool) -> u32;
-// fn bgfx_topology_sort_tri_list(sort: TopologySort, dst: *mut c_void, dstSize: u32, dir: [c_float; 3], pos: [c_float; 3], vertices: *const c_void, stride: u32, indices: *const c_void, numIndices: u32, index32: bool);
+pub fn topology_convert16(conversion: TopologyConvert, dst: &mut [u8], indices: &[u16]) -> u32 {
+    let ptr1 = dst.as_mut_ptr();
+    let ptr2 = indices.as_ptr();
+    unsafe{bgfx_topology_convert(conversion, transmute(ptr1), dst.len() as u32, transmute(ptr2), indices.len() as u32, false)}
+}
+
+pub fn topology_convert32(conversion: TopologyConvert, dst: &mut [u8], indices: &[u32]) -> u32 {
+    let ptr1 = dst.as_mut_ptr();
+    let ptr2 = indices.as_ptr();
+    // TODO make sure dst has enough space
+    unsafe{bgfx_topology_convert(conversion, transmute(ptr1), dst.len() as u32, transmute(ptr2), indices.len() as u32, true)}
+}
+
+pub fn topology_sort_tri_list(sort: TopologySort, dst: &mut [u8], dir: [c_float; 3], pos: [c_float; 3], vertices: &[u8], stride: u32, indices: &[u16]) {
+    let ptr1 = dst.as_mut_ptr();
+    let ptr2 = vertices.as_ptr();
+    let ptr3 = indices.as_ptr();
+    unsafe{bgfx_topology_sort_tri_list(sort, transmute(ptr1), dst.len() as u32, dir, pos, transmute(ptr2), stride, transmute(ptr3), indices.len() as u32, false)}
+}
+
+
+
+
 // fn bgfx_get_caps() -> *const Caps;
 // fn bgfx_get_stats() -> *const Stats;
 // fn bgfx_alloc(size: u32) -> *const Memory;
