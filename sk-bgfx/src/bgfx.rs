@@ -250,7 +250,7 @@ pub type DynamicIndexBufferHandleImpl = u16;
 pub type DynamicVertexBufferHandleImpl = u16;
 pub type FrameBufferHandleImpl = u16;
 pub type IndexBufferHandleImpl = u16;
-pub type IndirectBufferHandle = u16;
+pub type IndirectBufferHandleImpl = u16;
 pub type OcclusionQueryHandle = u16;
 pub type ProgramHandle = u16;
 pub type ShaderHandleImpl = u16;
@@ -277,6 +277,7 @@ pub struct DynamicIndexBufferHandle { handle: DynamicIndexBufferHandleImpl }
 pub struct DynamicVertexBufferHandle { handle: DynamicVertexBufferHandleImpl }
 pub struct ShaderHandle { handle: ShaderHandleImpl }
 pub struct UniformHandle { handle: UniformHandleImpl }
+pub struct IndirectBufferHandle { handle: IndirectBufferHandleImpl }
 
 #[repr(C)]
 pub struct Memory {
@@ -625,8 +626,8 @@ extern "C" {
     fn bgfx_alloc_transient_vertex_buffer(tvb: *mut TransientVertexBuffer, num: u32, decl: *const VertexDecl );
     fn bgfx_alloc_transient_buffers(tvb: *mut TransientVertexBuffer, decl: *const VertexDecl, numVertices: u32, tib: *mut TransientIndexBuffer, numIndices: u32) -> bool;
     fn bgfx_alloc_instance_data_buffer(idb: *mut InstanceDataBuffer, num: u32, stride: u16);
-    fn bgfx_create_indirect_buffer(num: u32) -> IndirectBufferHandle;
-    fn bgfx_destroy_indirect_buffer(handle: IndirectBufferHandle);
+    fn bgfx_create_indirect_buffer(num: u32) -> IndirectBufferHandleImpl;
+    fn bgfx_destroy_indirect_buffer(handle: IndirectBufferHandleImpl);
     fn bgfx_create_shader(mem: *const Memory ) -> ShaderHandleImpl;
     fn bgfx_get_shader_uniforms(handle: ShaderHandleImpl, uniforms: *mut UniformHandleImpl, max: u16) -> u16;
     fn bgfx_get_uniform_info(handle: UniformHandleImpl, info: *mut UniformInfo );
@@ -697,15 +698,15 @@ extern "C" {
     fn bgfx_touch(id: ViewId);
     fn bgfx_submit(id: ViewId, handle: ProgramHandle, depth: i32, preserveState: bool);
     fn bgfx_submit_occlusion_query(id: ViewId, program: ProgramHandle, occlusionQuery: OcclusionQueryHandle, depth: i32, preserveState: bool);
-    fn bgfx_submit_indirect(id: ViewId, handle: ProgramHandle, indirectHandle: IndirectBufferHandle, start: u16, num: u16, depth: i32, preserveState: bool);
+    fn bgfx_submit_indirect(id: ViewId, handle: ProgramHandle, indirectHandle: IndirectBufferHandleImpl, start: u16, num: u16, depth: i32, preserveState: bool);
     fn bgfx_set_image(stage: u8, handle: TextureHandleImpl, mip: u8, access: Access, format: TextureFormat);
     fn bgfx_set_compute_index_buffer(stage: u8, handle: IndexBufferHandleImpl, access: Access);
     fn bgfx_set_compute_vertex_buffer(stage: u8, handle: VertexBufferHandleImpl, access: Access);
     fn bgfx_set_compute_dynamic_index_buffer(stage: u8, handle: DynamicIndexBufferHandleImpl, access: Access);
     fn bgfx_set_compute_dynamic_vertex_buffer(stage: u8, handle: DynamicVertexBufferHandleImpl, access: Access);
-    fn bgfx_set_compute_indirect_buffer(stage: u8, handle: IndirectBufferHandle, access: Access);
+    fn bgfx_set_compute_indirect_buffer(stage: u8, handle: IndirectBufferHandleImpl, access: Access);
     fn bgfx_dispatch(id: ViewId, handle: ProgramHandle, numX: u32, numY: u32, numZ: u32, flags: u8);
-    fn bgfx_dispatch_indirect(id: ViewId, handle: ProgramHandle, indirectHandle: IndirectBufferHandle, start: u16, num: u16, flags: u8);
+    fn bgfx_dispatch_indirect(id: ViewId, handle: ProgramHandle, indirectHandle: IndirectBufferHandleImpl, start: u16, num: u16, flags: u8);
     fn bgfx_discard();
     fn bgfx_blit(id: ViewId, dst: TextureHandleImpl, dstMip: u8, dstX: u16, dstY: u16, dstZ: u16, src: TextureHandleImpl, srcMip: u8, srcX: u16, srcY: u16, srcZ: u16, width: u16, height: u16, depth: u16);
     fn bgfx_encoder_set_marker(encoder: *mut EncoderImpl, marker: *const c_char);
@@ -732,15 +733,15 @@ extern "C" {
     fn bgfx_encoder_touch(encoder: *mut EncoderImpl, id: ViewId);
     fn bgfx_encoder_submit(encoder: *mut EncoderImpl, id: ViewId, handle: ProgramHandle, depth: i32, preserveState: bool);
     fn bgfx_encoder_submit_occlusion_query(encoder: *mut EncoderImpl, id: ViewId, program: ProgramHandle, occlusionQuery: OcclusionQueryHandle, depth: i32, preserveState: bool);
-    fn bgfx_encoder_submit_indirect(encoder: *mut EncoderImpl, id: ViewId, handle: ProgramHandle, indirectHandle: IndirectBufferHandle, start: u16, num: u16, depth: i32, preserveState: bool);
+    fn bgfx_encoder_submit_indirect(encoder: *mut EncoderImpl, id: ViewId, handle: ProgramHandle, indirectHandle: IndirectBufferHandleImpl, start: u16, num: u16, depth: i32, preserveState: bool);
     fn bgfx_encoder_set_image(encoder: *mut EncoderImpl, stage: u8, handle: TextureHandleImpl, mip: u8, access: Access, format: TextureFormat);
     fn bgfx_encoder_set_compute_index_buffer(encoder: *mut EncoderImpl, stage: u8, handle: IndexBufferHandleImpl, access: Access);
     fn bgfx_encoder_set_compute_vertex_buffer(encoder: *mut EncoderImpl, stage: u8, handle: VertexBufferHandleImpl, access: Access);
     fn bgfx_encoder_set_compute_dynamic_index_buffer(encoder: *mut EncoderImpl, stage: u8, handle: DynamicIndexBufferHandleImpl, access: Access);
     fn bgfx_encoder_set_compute_dynamic_vertex_buffer(encoder: *mut EncoderImpl, stage: u8, handle: DynamicVertexBufferHandleImpl, access: Access);
-    fn bgfx_encoder_set_compute_indirect_buffer(encoder: *mut EncoderImpl, stage: u8, handle: IndirectBufferHandle, access: Access);
+    fn bgfx_encoder_set_compute_indirect_buffer(encoder: *mut EncoderImpl, stage: u8, handle: IndirectBufferHandleImpl, access: Access);
     fn bgfx_encoder_dispatch(encoder: *mut EncoderImpl, id: ViewId, handle: ProgramHandle, numX: u32, numY: u32, numZ: u32, flags: u8);
-    fn bgfx_encoder_dispatch_indirect(encoder: *mut EncoderImpl, id: ViewId, handle: ProgramHandle, indirectHandle: IndirectBufferHandle, start: u16, num: u16, flags: u8);
+    fn bgfx_encoder_dispatch_indirect(encoder: *mut EncoderImpl, id: ViewId, handle: ProgramHandle, indirectHandle: IndirectBufferHandleImpl, start: u16, num: u16, flags: u8);
     fn bgfx_encoder_discard(encoder: *mut EncoderImpl);
     fn bgfx_encoder_blit(encoder: *mut EncoderImpl, id: ViewId, dst: TextureHandleImpl, dstMip: u8, dstX: u16, dstY: u16, dstZ: u16, src: TextureHandleImpl, srcMip: u8, srcX: u16, srcY: u16, srcZ: u16, width: u16, height: u16, depth: u16);
     fn bgfx_request_screen_shot(handle: FrameBufferHandleImpl, filePath: *const c_char);
@@ -898,7 +899,7 @@ impl Encoder {
         unsafe { bgfx_encoder_submit_occlusion_query(self.handle, id, program, occlusion_query, depth, preserve_state); }
     }
 
-    pub fn submit_indirect(&mut self, id: ViewId, handle: ProgramHandle, indirect_handle: IndirectBufferHandle, start: u16, num: u16, depth: i32, preserve_state: bool) {
+    pub fn submit_indirect(&mut self, id: ViewId, handle: ProgramHandle, indirect_handle: IndirectBufferHandleImpl, start: u16, num: u16, depth: i32, preserve_state: bool) {
         unsafe { bgfx_encoder_submit_indirect(self.handle, id, handle, indirect_handle, start, num, depth, preserve_state); }
     }
 
@@ -922,7 +923,7 @@ impl Encoder {
         unsafe { bgfx_encoder_set_compute_dynamic_vertex_buffer(self.handle, stage, handle, access); }
     }
 
-    pub fn set_compute_indirect_buffer(&mut self, stage: u8, handle: IndirectBufferHandle, access: Access) {
+    pub fn set_compute_indirect_buffer(&mut self, stage: u8, handle: IndirectBufferHandleImpl, access: Access) {
         unsafe { bgfx_encoder_set_compute_indirect_buffer(self.handle, stage, handle, access); }
     }
 
@@ -930,7 +931,7 @@ impl Encoder {
         unsafe { bgfx_encoder_dispatch(self.handle, id, handle, num_x, num_y, num_z, flags); }
     }
 
-    pub fn dispatch_indirect(&mut self, id: ViewId, handle: ProgramHandle, indirect_handle: IndirectBufferHandle, start: u16, num: u16, flags: u8) {
+    pub fn dispatch_indirect(&mut self, id: ViewId, handle: ProgramHandle, indirect_handle: IndirectBufferHandleImpl, start: u16, num: u16, flags: u8) {
         unsafe { bgfx_encoder_dispatch_indirect(self.handle, id, handle, indirect_handle, start, num, flags); }
     }
 
@@ -958,7 +959,7 @@ pub fn submit_occlusion_query(id: ViewId, program: ProgramHandle, occlusion_quer
     unsafe { bgfx_submit_occlusion_query(id, program, occlusion_query, depth, preserve_state); }
 }
 
-pub fn submit_indirect(id: ViewId, handle: ProgramHandle, indirect_handle: IndirectBufferHandle, start: u16, num: u16, depth: i32, preserve_state: bool) {
+pub fn submit_indirect(id: ViewId, handle: ProgramHandle, indirect_handle: IndirectBufferHandleImpl, start: u16, num: u16, depth: i32, preserve_state: bool) {
     unsafe { bgfx_submit_indirect(id, handle, indirect_handle, start, num, depth, preserve_state); }
 }
 
@@ -982,7 +983,7 @@ pub fn set_compute_dynamic_vertex_buffer(stage: u8, handle: DynamicVertexBufferH
     unsafe { bgfx_set_compute_dynamic_vertex_buffer(stage, handle, access); }
 }
 
-pub fn set_compute_indirect_buffer(stage: u8, handle: IndirectBufferHandle, access: Access) {
+pub fn set_compute_indirect_buffer(stage: u8, handle: IndirectBufferHandleImpl, access: Access) {
     unsafe { bgfx_set_compute_indirect_buffer(stage, handle, access); }
 }
 
@@ -990,7 +991,7 @@ pub fn dispatch(id: ViewId, handle: ProgramHandle, num_x: u32, num_y: u32, num_z
     unsafe { bgfx_dispatch(id, handle, num_x, num_y, num_z, flags); }
 }
 
-pub fn dispatch_indirect(id: ViewId, handle: ProgramHandle, indirect_handle: IndirectBufferHandle, start: u16, num: u16, flags: u8) {
+pub fn dispatch_indirect(id: ViewId, handle: ProgramHandle, indirect_handle: IndirectBufferHandleImpl, start: u16, num: u16, flags: u8) {
     unsafe { bgfx_dispatch_indirect(id, handle, indirect_handle, start, num, flags); }
 }
 
@@ -1511,6 +1512,22 @@ impl Drop for ShaderHandle {
     }
 }
 
+//---------------------------------------------------------------------
+// Indirect buffers
+//---------------------------------------------------------------------
+
+impl IndexBufferHandle {
+    pub fn with_length(len: u32) -> IndexBufferHandle {
+        unsafe {IndexBufferHandle{handle:bgfx_create_indirect_buffer(len)}}
+    }
+}
+
+impl Drop for IndirectBufferHandle {
+    fn drop(&mut self) {
+        unsafe {bgfx_destroy_indirect_buffer(self.handle)}
+    }
+}
+
 impl UniformHandle {
 // fn bgfx_create_uniform(name: *const c_char, kind: UniformKind, num: u16) -> UniformHandleImpl;
 //    pub fn get_uniform_info(handle: UniformHandleImpl, info: *mut UniformInfo );
@@ -1562,8 +1579,6 @@ pub unsafe fn debug_text_image(x: u16, y: u16, width: u16, height: u16, data: &[
 // fn bgfx_make_ref(data: *const c_void, size: u32) -> *const Memory;
 // fn bgfx_make_ref_release(data: *const c_void, size: u32, releaseFn: ReleaseFn, userData: *mut c_void) -> *const Memory;
 // fn bgfx_set_debug(debug: u32);
-// fn bgfx_create_indirect_buffer(num: u32) -> IndirectBufferHandle;
-// fn bgfx_destroy_indirect_buffer(handle: IndirectBufferHandle);
 // fn bgfx_create_program(vsh: ShaderHandleImpl, fsh: ShaderHandleImpl, destroyShaders: bool) -> ProgramHandle;
 // fn bgfx_create_compute_program(csh: ShaderHandleImpl, destroyShaders: bool) -> ProgramHandle;
 // fn bgfx_destroy_program(handle: ProgramHandle);
