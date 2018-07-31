@@ -1621,9 +1621,25 @@ pub fn set_debug(debug: u32) {
     unsafe{bgfx_set_debug(debug)}
 }
 
-// fn bgfx_vertex_pack(input: [c_float; 4], inputNormalized: bool, attr: Attrib, decl: *const VertexDecl, data: *mut c_void, index: u32);
-// fn bgfx_vertex_unpack(output: [c_float; 4], attr: Attrib, decl: *const VertexDecl, data: *const c_void, index: u32);
-// fn bgfx_vertex_convert(destDecl: *const VertexDecl, destData: *mut c_void, srcDecl: *const VertexDecl, srcData: *const c_void, num: u32);
+pub fn vertex_pack(input: [c_float; 4], input_normalized: bool, attr: Attrib, decl: &VertexDecl, data: &mut [u8], index: u32) {
+    // TODO check that data vector is large enough to hold decl.size * index
+    let ptr = data.as_mut_ptr();
+    unsafe{bgfx_vertex_pack(input, input_normalized, attr, decl, transmute(ptr), index)}
+}
+
+pub fn vertex_unpack(output: &mut [c_float; 4], attr: Attrib, decl: &VertexDecl, data: &[u8], index: u32) {
+    // TODO check that data vector is large enough to hold decl.size * index
+    let ptr = data.as_ptr();
+    unsafe{bgfx_vertex_unpack(*output, attr, decl, transmute(ptr), index)}
+}
+
+pub fn vertex_convert(dest_decl: &VertexDecl, dest_data: &mut [u8], src_decl: &VertexDecl, src_data: &[u8], num: u32) {
+    let ptr1 = dest_data.as_mut_ptr();
+    let ptr2 = src_data.as_ptr();
+    unsafe{bgfx_vertex_convert(dest_decl, transmute(ptr1), src_decl, transmute(ptr2), num)}
+}
+
+
 // fn bgfx_weld_vertices(output: *mut u16, decl: *const VertexDecl, data: *const c_void, num: u16, epsilon: c_float) -> u16;
 // fn bgfx_topology_convert(conversion: TopologyConvert, dst: *mut c_void, dstSize: u32, indices: *const c_void, numIndices: u32, index32: bool) -> u32;
 // fn bgfx_topology_sort_tri_list(sort: TopologySort, dst: *mut c_void, dstSize: u32, dir: [c_float; 3], pos: [c_float; 3], vertices: *const c_void, stride: u32, indices: *const c_void, numIndices: u32, index32: bool);
