@@ -636,8 +636,8 @@ extern "C" {
     fn bgfx_create_program(vsh: ShaderHandleImpl, fsh: ShaderHandleImpl, destroyShaders: bool) -> ProgramHandle;
     fn bgfx_create_compute_program(csh: ShaderHandleImpl, destroyShaders: bool) -> ProgramHandle;
     fn bgfx_destroy_program(handle: ProgramHandle);
-    fn bgfx_is_texture_valid(depth: u16, cubeMap: bool, num_layers: u16, format: TextureFormat, flags: u32) -> bool;
-    fn bgfx_calc_texture_size(info: *mut TextureInfo, width: u16, height: u16, depth: u16, cubeMap: bool, has_mips: bool, num_layers: u16, format: TextureFormat);
+    fn bgfx_is_texture_valid(depth: u16, cube_map: bool, num_layers: u16, format: TextureFormat, flags: u32) -> bool;
+    fn bgfx_calc_texture_size(info: *mut TextureInfo, width: u16, height: u16, depth: u16, cube_map: bool, has_mips: bool, num_layers: u16, format: TextureFormat);
     fn bgfx_create_texture(mem: *const Memory, flags: u32, skip: u8, info: *mut TextureInfo ) -> TextureHandleImpl;
     fn bgfx_create_texture_2d(width: u16, height: u16, has_mips: bool, num_layers: u16, format: TextureFormat, flags: u32, mem: *const Memory ) -> TextureHandleImpl;
     fn bgfx_create_texture_2d_scaled(ratio: BackbufferRatio, has_mips: bool, num_layers: u16, format: TextureFormat, flags: u32) -> TextureHandleImpl;
@@ -1566,6 +1566,14 @@ pub unsafe fn debug_text_image(x: u16, y: u16, width: u16, height: u16, data: &[
     bgfx_dbg_text_image(x, y, width, height, transmute(ptr), pitch)
 }
 
+pub fn is_texture_valid(depth: u16, cube_map: bool, num_layers: u16, format: TextureFormat, flags: u32) -> bool {
+    unsafe {bgfx_is_texture_valid(depth, cube_map, num_layers, format, flags)}
+}
+
+pub fn calc_texture_size(info: &mut TextureInfo, width: u16, height: u16, depth: u16, cube_map: bool, has_mips: bool, num_layers: u16, format: TextureFormat) {
+    unsafe {bgfx_calc_texture_size(info, width, height, depth, cube_map, has_mips, num_layers, format)}
+}
+
 // fn bgfx_vertex_pack(input: [c_float; 4], inputNormalized: bool, attr: Attrib, decl: *const VertexDecl, data: *mut c_void, index: u32);
 // fn bgfx_vertex_unpack(output: [c_float; 4], attr: Attrib, decl: *const VertexDecl, data: *const c_void, index: u32);
 // fn bgfx_vertex_convert(destDecl: *const VertexDecl, destData: *mut c_void, srcDecl: *const VertexDecl, srcData: *const c_void, num: u32);
@@ -1582,9 +1590,6 @@ pub unsafe fn debug_text_image(x: u16, y: u16, width: u16, height: u16, data: &[
 // fn bgfx_create_program(vsh: ShaderHandleImpl, fsh: ShaderHandleImpl, destroyShaders: bool) -> ProgramHandle;
 // fn bgfx_create_compute_program(csh: ShaderHandleImpl, destroyShaders: bool) -> ProgramHandle;
 // fn bgfx_destroy_program(handle: ProgramHandle);
-// fn bgfx_is_texture_valid(depth: u16, cubeMap: bool, num_layers: u16, format: TextureFormat, flags: u32) -> bool;
-// fn bgfx_calc_texture_size(info: *mut TextureInfo, width: u16, height: u16, depth: u16, cubeMap: bool, has_mips: bool, num_layers: u16, format: TextureFormat);
-// fn bgfx_create_texture(mem: *const Memory, flags: u32, skip: u8, info: *mut TextureInfo ) -> TextureHandleImpl;
 // fn bgfx_get_texture(handle: FrameBufferHandleImpl, attachment: u8) -> TextureHandleImpl;
 // fn bgfx_create_occlusion_query() -> OcclusionQueryHandle;
 // fn bgfx_get_result(handle: OcclusionQueryHandle, result: *mut i32) -> OcclusionQueryResult;
