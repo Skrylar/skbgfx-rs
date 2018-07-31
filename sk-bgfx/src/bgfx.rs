@@ -585,43 +585,37 @@ extern "C" {
     fn bgfx_vertex_decl_decode(decl: *const VertexDecl, attrib: *mut Attrib, num: *mut u8, kind: *mut AttribKind, normalized: *mut bool, asInt: *mut bool);
     fn bgfx_vertex_decl_has(decl: *const VertexDecl, attrib: Attrib) -> bool;
     fn bgfx_vertex_decl_skip(decl: *mut VertexDecl, num: u8);
-    fn bgfx_vertex_decl_end(decl: *mut VertexDecl );
+    fn bgfx_vertex_decl_end(decl: *mut VertexDecl);
     fn bgfx_vertex_pack(input: [c_float; 4], inputNormalized: bool, attr: Attrib, decl: *const VertexDecl, data: *mut c_void, index: u32);
     fn bgfx_vertex_unpack(output: [c_float; 4], attr: Attrib, decl: *const VertexDecl, data: *const c_void, index: u32);
     fn bgfx_vertex_convert(destDecl: *const VertexDecl, destData: *mut c_void, srcDecl: *const VertexDecl, srcData: *const c_void, num: u32);
     fn bgfx_weld_vertices(output: *mut u16, decl: *const VertexDecl, data: *const c_void, num: u16, epsilon: c_float) -> u16;
     fn bgfx_topology_convert(conversion: TopologyConvert, dst: *mut c_void, dstSize: u32, indices: *const c_void, numIndices: u32, index32: bool) -> u32;
     fn bgfx_topology_sort_tri_list(sort: TopologySort, dst: *mut c_void, dstSize: u32, dir: [c_float; 3], pos: [c_float; 3], vertices: *const c_void, stride: u32, indices: *const c_void, numIndices: u32, index32: bool);
-    fn bgfx_get_supported_renderers(max: u8, kind: *mut RendererKind ) -> u8;
+    fn bgfx_get_supported_renderers(max: u8, kind: *mut RendererKind) -> u8;
     fn bgfx_get_renderer_name(kind: RendererKind) -> *const c_char;
-    fn bgfx_init_ctor(init: *mut Init );
-    fn bgfx_init(init: *const Init ) -> bool;
+    fn bgfx_init_ctor(init: *mut Init);
+    fn bgfx_init(init: *const Init) -> bool;
     fn bgfx_shutdown();
     fn bgfx_reset(width: u32, height: u32, flags: u32);
     fn bgfx_begin() -> *mut EncoderImpl;
-    fn bgfx_end(encoder: *mut EncoderImpl );
+    fn bgfx_end(encoder: *mut EncoderImpl);
     fn bgfx_frame(capture: bool) -> u32;
     fn bgfx_get_renderer_type() -> RendererKind;
     fn bgfx_get_caps() -> *const Caps;
     fn bgfx_get_stats() -> *const Stats;
-    fn bgfx_alloc(size: u32) -> *const MemoryImpl
-   ;
-    fn bgfx_copy(data: *const c_void, size: u32) -> *const MemoryImpl
-   ;
-    fn bgfx_make_ref(data: *const c_void, size: u32) -> *const MemoryImpl
-   ;
-    fn bgfx_make_ref_release(data: *const c_void, size: u32, release_fn: ReleaseFn, user_data: *mut c_void) -> *const MemoryImpl
-   ;
+    fn bgfx_alloc(size: u32) -> *const MemoryImpl;
+    fn bgfx_copy(data: *const c_void, size: u32) -> *const MemoryImpl;
+    fn bgfx_make_ref(data: *const c_void, size: u32) -> *const MemoryImpl;
+    fn bgfx_make_ref_release(data: *const c_void, size: u32, release_fn: ReleaseFn, user_data: *mut c_void) -> *const MemoryImpl;
     fn bgfx_set_debug(debug: u32);
     fn bgfx_dbg_text_clear(attr: u8, small: bool);
-    fn bgfx_dbg_text_printf(x: u16, y: u16, attr: u8, format: *const c_char, ... );
+    fn bgfx_dbg_text_printf(x: u16, y: u16, attr: u8, format: *const c_char, ...);
     fn bgfx_dbg_text_vprintf(x: u16, y: u16, attr: u8, format: *const c_char, argList: VaList);
     fn bgfx_dbg_text_image(x: u16, y: u16, width: u16, height: u16, data: *const c_void, pitch: u16);
-    fn bgfx_create_index_buffer(mem: *const MemoryImpl
-                              , flags: u16) -> IndexBufferHandleImpl;
+    fn bgfx_create_index_buffer(mem: *const MemoryImpl, flags: u16) -> IndexBufferHandleImpl;
     fn bgfx_destroy_index_buffer(handle: IndexBufferHandleImpl);
-    fn bgfx_create_vertex_buffer(mem: *const MemoryImpl
-                               , decl: *const VertexDecl, flags: u16) -> VertexBufferHandleImpl;
+    fn bgfx_create_vertex_buffer(mem: *const MemoryImpl, decl: *const VertexDecl, flags: u16) -> VertexBufferHandleImpl;
     fn bgfx_destroy_vertex_buffer(handle: VertexBufferHandleImpl);
     fn bgfx_create_dynamic_index_buffer(num: u32, flags: u16) -> DynamicIndexBufferHandleImpl;
     fn bgfx_create_dynamic_index_buffer_mem(mem: *const MemoryImpl, flags: u16) -> DynamicIndexBufferHandleImpl;
@@ -635,14 +629,14 @@ extern "C" {
     fn bgfx_get_avail_transient_vertex_buffer(num: u32, decl: *const VertexDecl) -> u32;
     fn bgfx_get_avail_instance_data_buffer(num: u32, stride: u16) -> u32;
     fn bgfx_alloc_transient_index_buffer(tib: *mut TransientIndexBuffer, num: u32);
-    fn bgfx_alloc_transient_vertex_buffer(tvb: *mut TransientVertexBuffer, num: u32, decl: *const VertexDecl );
+    fn bgfx_alloc_transient_vertex_buffer(tvb: *mut TransientVertexBuffer, num: u32, decl: *const VertexDecl);
     fn bgfx_alloc_transient_buffers(tvb: *mut TransientVertexBuffer, decl: *const VertexDecl, numVertices: u32, tib: *mut TransientIndexBuffer, numIndices: u32) -> bool;
     fn bgfx_alloc_instance_data_buffer(idb: *mut InstanceDataBuffer, num: u32, stride: u16);
     fn bgfx_create_indirect_buffer(num: u32) -> IndirectBufferHandleImpl;
     fn bgfx_destroy_indirect_buffer(handle: IndirectBufferHandleImpl);
     fn bgfx_create_shader(mem: *const MemoryImpl) -> ShaderHandleImpl;
     fn bgfx_get_shader_uniforms(handle: ShaderHandleImpl, uniforms: *mut UniformHandleImpl, max: u16) -> u16;
-    fn bgfx_get_uniform_info(handle: UniformHandleImpl, info: *mut UniformInfo );
+    fn bgfx_get_uniform_info(handle: UniformHandleImpl, info: *mut UniformInfo);
     fn bgfx_set_shader_name(handle: ShaderHandleImpl, name: *const c_char, len: i32);
     fn bgfx_destroy_shader(handle: ShaderHandleImpl);
     fn bgfx_create_program(vsh: ShaderHandleImpl, fsh: ShaderHandleImpl, destroyShaders: bool) -> ProgramHandleImpl;
