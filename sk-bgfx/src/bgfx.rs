@@ -817,8 +817,8 @@ impl Encoder {
         unsafe { bgfx_encoder_set_state(self.handle, state, rgba); }
     }
 
-    pub fn set_condition(&mut self, handle: OcclusionQueryHandleImpl, visible: bool) {
-        unsafe { bgfx_encoder_set_condition(self.handle, handle, visible); }
+    pub fn set_condition(&mut self, handle: OcclusionQueryHandle, visible: bool) {
+        unsafe { bgfx_encoder_set_condition(self.handle, handle.handle, visible); }
     }
 
     pub fn set_stencil(&mut self, fstencil: u32, bstencil: u32) {
@@ -845,28 +845,28 @@ impl Encoder {
         unsafe { bgfx_encoder_set_transform_cached(self.handle, cache, num); }
     }
 
-    pub fn set_uniform(&mut self, handle: UniformHandleImpl, value: &c_void, num: u16) {
-        unsafe { bgfx_encoder_set_uniform(self.handle, handle, value, num); }
+    pub fn set_uniform(&mut self, handle: UniformHandle, value: &c_void, num: u16) {
+        unsafe { bgfx_encoder_set_uniform(self.handle, handle.handle, value, num); }
     }
 
-    pub fn set_index_buffer(&mut self, handle: IndexBufferHandleImpl, first_index: u32, num_indices: u32) {
-        unsafe { bgfx_encoder_set_index_buffer(self.handle, handle, first_index, num_indices); }
+    pub fn set_index_buffer(&mut self, handle: IndexBufferHandle, first_index: u32, num_indices: u32) {
+        unsafe { bgfx_encoder_set_index_buffer(self.handle, handle.handle, first_index, num_indices); }
     }
 
-    pub fn set_dynamic_index_buffer(&mut self, handle: DynamicIndexBufferHandleImpl, first_index: u32, num_indices: u32) {
-        unsafe { bgfx_encoder_set_dynamic_index_buffer(self.handle, handle, first_index, num_indices); }
+    pub fn set_dynamic_index_buffer(&mut self, handle: DynamicIndexBufferHandle, first_index: u32, num_indices: u32) {
+        unsafe { bgfx_encoder_set_dynamic_index_buffer(self.handle, handle.handle, first_index, num_indices); }
     }
 
     pub fn set_transient_index_buffer(&mut self, tib: &TransientIndexBuffer, first_index: u32, num_indices: u32) {
         unsafe { bgfx_encoder_set_transient_index_buffer(self.handle, tib, first_index, num_indices); }
     }
 
-    pub fn set_vertex_buffer(&mut self, stream: u8, handle: VertexBufferHandleImpl, start_vertex: u32, num_vertices: u32) {
-        unsafe { bgfx_encoder_set_vertex_buffer(self.handle, stream, handle, start_vertex, num_vertices); }
+    pub fn set_vertex_buffer(&mut self, stream: u8, handle: VertexBufferHandle, start_vertex: u32, num_vertices: u32) {
+        unsafe { bgfx_encoder_set_vertex_buffer(self.handle, stream, handle.handle, start_vertex, num_vertices); }
     }
 
-    pub fn set_dynamic_vertex_buffer(&mut self, stream: u8, handle: DynamicVertexBufferHandleImpl, start_vertex: u32, num_vertices: u32) {
-        unsafe { bgfx_encoder_set_dynamic_vertex_buffer(self.handle, stream, handle, start_vertex, num_vertices); }
+    pub fn set_dynamic_vertex_buffer(&mut self, stream: u8, handle: DynamicVertexBufferHandle, start_vertex: u32, num_vertices: u32) {
+        unsafe { bgfx_encoder_set_dynamic_vertex_buffer(self.handle, stream, handle.handle, start_vertex, num_vertices); }
     }
 
     pub fn set_transient_vertex_buffer(&mut self, stream: u8, tvb: &TransientVertexBuffer, start_vertex: u32, num_vertices: u32) {
@@ -881,72 +881,72 @@ impl Encoder {
         unsafe { bgfx_encoder_set_instance_data_buffer(self.handle, idb, start, num); }
     }
 
-    pub fn set_instance_data_from_vertex_buffer(&mut self, handle: VertexBufferHandleImpl, start_vertex: u32, num: u32) {
-        unsafe { bgfx_encoder_set_instance_data_from_vertex_buffer(self.handle, handle, start_vertex, num); }
+    pub fn set_instance_data_from_vertex_buffer(&mut self, handle: VertexBufferHandle, start_vertex: u32, num: u32) {
+        unsafe { bgfx_encoder_set_instance_data_from_vertex_buffer(self.handle, handle.handle, start_vertex, num); }
     }
 
-    pub fn set_instance_data_from_dynamic_vertex_buffer(&mut self, handle: DynamicVertexBufferHandleImpl, start_vertex: u32, num: u32) {
-        unsafe { bgfx_encoder_set_instance_data_from_dynamic_vertex_buffer(self.handle, handle, start_vertex, num); }
+    pub fn set_instance_data_from_dynamic_vertex_buffer(&mut self, handle: DynamicVertexBufferHandle, start_vertex: u32, num: u32) {
+        unsafe { bgfx_encoder_set_instance_data_from_dynamic_vertex_buffer(self.handle, handle.handle, start_vertex, num); }
     }
 
-    pub fn set_texture(&mut self, stage: u8, sampler: UniformHandleImpl, handle: TextureHandleImpl, flags: u32) {
-        unsafe { bgfx_encoder_set_texture(self.handle, stage, sampler, handle, flags); }
+    pub fn set_texture(&mut self, stage: u8, sampler: UniformHandle, handle: &TextureHandle, flags: u32) {
+        unsafe { bgfx_encoder_set_texture(self.handle, stage, sampler.handle, handle.expose_handle(), flags); }
     }
 
     pub fn touch(&mut self, id: ViewId) {
         unsafe { bgfx_encoder_touch(self.handle, id); }
     }
 
-    pub fn submit(&mut self, id: ViewId, handle: ProgramHandleImpl, depth: i32, preserve_state: bool) {
-        unsafe { bgfx_encoder_submit(self.handle, id, handle, depth, preserve_state); }
+    pub fn submit(&mut self, id: ViewId, handle: ProgramHandle, depth: i32, preserve_state: bool) {
+        unsafe { bgfx_encoder_submit(self.handle, id, handle.handle, depth, preserve_state); }
     }
 
-    pub fn submit_occlusion_query(&mut self, id: ViewId, program: ProgramHandleImpl, occlusion_query: OcclusionQueryHandleImpl, depth: i32, preserve_state: bool) {
-        unsafe { bgfx_encoder_submit_occlusion_query(self.handle, id, program, occlusion_query, depth, preserve_state); }
+    pub fn submit_occlusion_query(&mut self, id: ViewId, program: ProgramHandle, occlusion_query: OcclusionQueryHandle, depth: i32, preserve_state: bool) {
+        unsafe { bgfx_encoder_submit_occlusion_query(self.handle, id, program.handle, occlusion_query.handle, depth, preserve_state); }
     }
 
-    pub fn submit_indirect(&mut self, id: ViewId, handle: ProgramHandleImpl, indirect_handle: IndirectBufferHandleImpl, start: u16, num: u16, depth: i32, preserve_state: bool) {
-        unsafe { bgfx_encoder_submit_indirect(self.handle, id, handle, indirect_handle, start, num, depth, preserve_state); }
+    pub fn submit_indirect(&mut self, id: ViewId, handle: ProgramHandle, indirect_handle: IndirectBufferHandle, start: u16, num: u16, depth: i32, preserve_state: bool) {
+        unsafe { bgfx_encoder_submit_indirect(self.handle, id, handle.handle, indirect_handle.handle, start, num, depth, preserve_state); }
     }
 
-    pub fn set_image(&mut self, stage: u8, handle: TextureHandleImpl, mip: u8, access: Access, format: TextureFormat) {
-        unsafe { bgfx_encoder_set_image(self.handle, stage, handle, mip, access, format); }
+    pub fn set_image(&mut self, stage: u8, handle: &TextureHandle, mip: u8, access: Access, format: TextureFormat) {
+        unsafe { bgfx_encoder_set_image(self.handle, stage, handle.expose_handle(), mip, access, format); }
     }
 
-    pub fn set_compute_index_buffer(&mut self, stage: u8, handle: IndexBufferHandleImpl, access: Access) {
-        unsafe { bgfx_encoder_set_compute_index_buffer(self.handle, stage, handle, access); }
+    pub fn set_compute_index_buffer(&mut self, stage: u8, handle: IndexBufferHandle, access: Access) {
+        unsafe { bgfx_encoder_set_compute_index_buffer(self.handle, stage, handle.handle, access); }
     }
 
-    pub fn set_compute_vertex_buffer(&mut self, stage: u8, handle: VertexBufferHandleImpl, access: Access) {
-        unsafe { bgfx_encoder_set_compute_vertex_buffer(self.handle, stage, handle, access); }
+    pub fn set_compute_vertex_buffer(&mut self, stage: u8, handle: VertexBufferHandle, access: Access) {
+        unsafe { bgfx_encoder_set_compute_vertex_buffer(self.handle, stage, handle.handle, access); }
     }
 
-    pub fn set_compute_dynamic_index_buffer(&mut self, stage: u8, handle: DynamicIndexBufferHandleImpl, access: Access) {
-        unsafe { bgfx_encoder_set_compute_dynamic_index_buffer(self.handle, stage, handle, access); }
+    pub fn set_compute_dynamic_index_buffer(&mut self, stage: u8, handle: DynamicIndexBufferHandle, access: Access) {
+        unsafe { bgfx_encoder_set_compute_dynamic_index_buffer(self.handle, stage, handle.handle, access); }
     }
 
-    pub fn set_compute_dynamic_vertex_buffer(&mut self, stage: u8, handle: DynamicVertexBufferHandleImpl, access: Access) {
-        unsafe { bgfx_encoder_set_compute_dynamic_vertex_buffer(self.handle, stage, handle, access); }
+    pub fn set_compute_dynamic_vertex_buffer(&mut self, stage: u8, handle: DynamicVertexBufferHandle, access: Access) {
+        unsafe { bgfx_encoder_set_compute_dynamic_vertex_buffer(self.handle, stage, handle.handle, access); }
     }
 
-    pub fn set_compute_indirect_buffer(&mut self, stage: u8, handle: IndirectBufferHandleImpl, access: Access) {
-        unsafe { bgfx_encoder_set_compute_indirect_buffer(self.handle, stage, handle, access); }
+    pub fn set_compute_indirect_buffer(&mut self, stage: u8, handle: IndirectBufferHandle, access: Access) {
+        unsafe { bgfx_encoder_set_compute_indirect_buffer(self.handle, stage, handle.handle, access); }
     }
 
-    pub fn dispatch(&mut self, id: ViewId, handle: ProgramHandleImpl, num_x: u32, num_y: u32, num_z: u32, flags: u8) {
-        unsafe { bgfx_encoder_dispatch(self.handle, id, handle, num_x, num_y, num_z, flags); }
+    pub fn dispatch(&mut self, id: ViewId, handle: ProgramHandle, num_x: u32, num_y: u32, num_z: u32, flags: u8) {
+        unsafe { bgfx_encoder_dispatch(self.handle, id, handle.handle, num_x, num_y, num_z, flags); }
     }
 
-    pub fn dispatch_indirect(&mut self, id: ViewId, handle: ProgramHandleImpl, indirect_handle: IndirectBufferHandleImpl, start: u16, num: u16, flags: u8) {
-        unsafe { bgfx_encoder_dispatch_indirect(self.handle, id, handle, indirect_handle, start, num, flags); }
+    pub fn dispatch_indirect(&mut self, id: ViewId, handle: ProgramHandle, indirect_handle: IndirectBufferHandle, start: u16, num: u16, flags: u8) {
+        unsafe { bgfx_encoder_dispatch_indirect(self.handle, id, handle.handle, indirect_handle.handle, start, num, flags); }
     }
 
     pub fn discard(&mut self) {
         unsafe { bgfx_encoder_discard(self.handle); }
     }
 
-    pub fn blit(&mut self, id: ViewId, dst: TextureHandleImpl, dst_mip: u8, dst_x: u16, dst_y: u16, dst_z: u16, src: TextureHandleImpl, src_mip: u8, src_x: u16, src_y: u16, src_z: u16, width: u16, height: u16, depth: u16) {
-        unsafe { bgfx_encoder_blit(self.handle, id, dst, dst_mip, dst_x, dst_y, dst_z, src, src_mip, src_x, src_y, src_z, width, height, depth); }
+    pub fn blit(&mut self, id: ViewId, dst: &TextureHandle, dst_mip: u8, dst_x: u16, dst_y: u16, dst_z: u16, src: &TextureHandle, src_mip: u8, src_x: u16, src_y: u16, src_z: u16, width: u16, height: u16, depth: u16) {
+        unsafe { bgfx_encoder_blit(self.handle, id, dst.expose_handle(), dst_mip, dst_x, dst_y, dst_z, src.expose_handle(), src_mip, src_x, src_y, src_z, width, height, depth); }
     }
 
 }
@@ -957,61 +957,61 @@ impl Drop for Encoder {
     }
 }
 
-pub fn submit(id: ViewId, handle: ProgramHandleImpl, depth: i32, preserve_state: bool) {
-    unsafe { bgfx_submit(id, handle, depth, preserve_state); }
+pub fn submit(id: ViewId, handle: ProgramHandle, depth: i32, preserve_state: bool) {
+    unsafe { bgfx_submit(id, handle.handle, depth, preserve_state); }
 }
 
-pub fn submit_occlusion_query(id: ViewId, program: ProgramHandleImpl, occlusion_query: OcclusionQueryHandleImpl, depth: i32, preserve_state: bool) {
-    unsafe { bgfx_submit_occlusion_query(id, program, occlusion_query, depth, preserve_state); }
+pub fn submit_occlusion_query(id: ViewId, program: ProgramHandle, occlusion_query: OcclusionQueryHandle, depth: i32, preserve_state: bool) {
+    unsafe { bgfx_submit_occlusion_query(id, program.handle, occlusion_query.handle, depth, preserve_state); }
 }
 
-pub fn submit_indirect(id: ViewId, handle: ProgramHandleImpl, indirect_handle: IndirectBufferHandleImpl, start: u16, num: u16, depth: i32, preserve_state: bool) {
-    unsafe { bgfx_submit_indirect(id, handle, indirect_handle, start, num, depth, preserve_state); }
+pub fn submit_indirect(id: ViewId, handle: ProgramHandle, indirect_handle: IndirectBufferHandle, start: u16, num: u16, depth: i32, preserve_state: bool) {
+    unsafe { bgfx_submit_indirect(id, handle.handle, indirect_handle.handle, start, num, depth, preserve_state); }
 }
 
-pub fn set_image(stage: u8, handle: TextureHandleImpl, mip: u8, access: Access, format: TextureFormat) {
-    unsafe { bgfx_set_image(stage, handle, mip, access, format); }
+pub fn set_image(stage: u8, handle: &TextureHandle, mip: u8, access: Access, format: TextureFormat) {
+    unsafe { bgfx_set_image(stage, handle.expose_handle(), mip, access, format); }
 }
 
-pub fn set_compute_index_buffer(stage: u8, handle: IndexBufferHandleImpl, access: Access) {
-    unsafe { bgfx_set_compute_index_buffer(stage, handle, access); }
+pub fn set_compute_index_buffer(stage: u8, handle: IndexBufferHandle, access: Access) {
+    unsafe { bgfx_set_compute_index_buffer(stage, handle.handle, access); }
 }
 
-pub fn set_compute_vertex_buffer(stage: u8, handle: VertexBufferHandleImpl, access: Access) {
-    unsafe { bgfx_set_compute_vertex_buffer(stage, handle, access); }
+pub fn set_compute_vertex_buffer(stage: u8, handle: VertexBufferHandle, access: Access) {
+    unsafe { bgfx_set_compute_vertex_buffer(stage, handle.handle, access); }
 }
 
-pub fn set_compute_dynamic_index_buffer(stage: u8, handle: DynamicIndexBufferHandleImpl, access: Access) {
-    unsafe { bgfx_set_compute_dynamic_index_buffer(stage, handle, access); }
+pub fn set_compute_dynamic_index_buffer(stage: u8, handle: DynamicIndexBufferHandle, access: Access) {
+    unsafe { bgfx_set_compute_dynamic_index_buffer(stage, handle.handle, access); }
 }
 
-pub fn set_compute_dynamic_vertex_buffer(stage: u8, handle: DynamicVertexBufferHandleImpl, access: Access) {
-    unsafe { bgfx_set_compute_dynamic_vertex_buffer(stage, handle, access); }
+pub fn set_compute_dynamic_vertex_buffer(stage: u8, handle: DynamicVertexBufferHandle, access: Access) {
+    unsafe { bgfx_set_compute_dynamic_vertex_buffer(stage, handle.handle, access); }
 }
 
-pub fn set_compute_indirect_buffer(stage: u8, handle: IndirectBufferHandleImpl, access: Access) {
-    unsafe { bgfx_set_compute_indirect_buffer(stage, handle, access); }
+pub fn set_compute_indirect_buffer(stage: u8, handle: IndirectBufferHandle, access: Access) {
+    unsafe { bgfx_set_compute_indirect_buffer(stage, handle.handle, access); }
 }
 
-pub fn dispatch(id: ViewId, handle: ProgramHandleImpl, num_x: u32, num_y: u32, num_z: u32, flags: u8) {
-    unsafe { bgfx_dispatch(id, handle, num_x, num_y, num_z, flags); }
+pub fn dispatch(id: ViewId, handle: ProgramHandle, num_x: u32, num_y: u32, num_z: u32, flags: u8) {
+    unsafe { bgfx_dispatch(id, handle.handle, num_x, num_y, num_z, flags); }
 }
 
-pub fn dispatch_indirect(id: ViewId, handle: ProgramHandleImpl, indirect_handle: IndirectBufferHandleImpl, start: u16, num: u16, flags: u8) {
-    unsafe { bgfx_dispatch_indirect(id, handle, indirect_handle, start, num, flags); }
+pub fn dispatch_indirect(id: ViewId, handle: ProgramHandle, indirect_handle: IndirectBufferHandle, start: u16, num: u16, flags: u8) {
+    unsafe { bgfx_dispatch_indirect(id, handle.handle, indirect_handle.handle, start, num, flags); }
 }
 
 pub fn discard() {
     unsafe { bgfx_discard(); }
 }
 
-pub fn blit(id: ViewId, dst: TextureHandleImpl, dst_mip: u8, dst_x: u16, dst_y: u16, dst_z: u16, src: TextureHandleImpl, src_mip: u8, src_x: u16, src_y: u16, src_z: u16, width: u16, height: u16, depth: u16) {
-    unsafe { bgfx_blit(id, dst, dst_mip, dst_x, dst_y, dst_z, src, src_mip, src_x, src_y, src_z, width, height, depth); }
+pub fn blit(id: ViewId, dst: &TextureHandle, dst_mip: u8, dst_x: u16, dst_y: u16, dst_z: u16, src: &TextureHandle, src_mip: u8, src_x: u16, src_y: u16, src_z: u16, width: u16, height: u16, depth: u16) {
+    unsafe { bgfx_blit(id, dst.expose_handle(), dst_mip, dst_x, dst_y, dst_z, src.expose_handle(), src_mip, src_x, src_y, src_z, width, height, depth); }
 }
 
-pub fn request_screen_shot_cstr(handle: FrameBufferHandleImpl, file_path: &CStr) {
+pub fn request_screen_shot_cstr(handle: FrameBufferHandle, file_path: &CStr) {
     let ptr = file_path.as_ptr();
-    unsafe { bgfx_request_screen_shot(handle, ptr); }
+    unsafe { bgfx_request_screen_shot(handle.handle, ptr); }
 }
 
 pub fn reset_view(id: ViewId) {
@@ -1027,8 +1027,8 @@ pub fn set_state(state: u64, rgba: u32) {
     unsafe { bgfx_set_state(state, rgba); }
 }
 
-pub fn set_condition(handle: OcclusionQueryHandleImpl, visible: bool) {
-    unsafe { bgfx_set_condition(handle, visible); }
+pub fn set_condition(handle: OcclusionQueryHandle, visible: bool) {
+    unsafe { bgfx_set_condition(handle.handle, visible); }
 }
 
 pub fn set_stencil(fstencil: u32, bstencil: u32) {
@@ -1055,28 +1055,28 @@ pub fn set_transform_cached(cache: u32, num: u16) {
     unsafe { bgfx_set_transform_cached(cache, num); }
 }
 
-pub fn set_uniform(handle: UniformHandleImpl, value: &c_void, num: u16) {
-    unsafe { bgfx_set_uniform(handle, value, num); }
+pub fn set_uniform(handle: UniformHandle, value: &c_void, num: u16) {
+    unsafe { bgfx_set_uniform(handle.handle, value, num); }
 }
 
-pub fn set_index_buffer(handle: IndexBufferHandleImpl, first_index: u32, num_indices: u32) {
-    unsafe { bgfx_set_index_buffer(handle, first_index, num_indices); }
+pub fn set_index_buffer(handle: IndexBufferHandle, first_index: u32, num_indices: u32) {
+    unsafe { bgfx_set_index_buffer(handle.handle, first_index, num_indices); }
 }
 
-pub fn set_dynamic_index_buffer(handle: DynamicIndexBufferHandleImpl, first_index: u32, num_indices: u32) {
-    unsafe { bgfx_set_dynamic_index_buffer(handle, first_index, num_indices); }
+pub fn set_dynamic_index_buffer(handle: DynamicIndexBufferHandle, first_index: u32, num_indices: u32) {
+    unsafe { bgfx_set_dynamic_index_buffer(handle.handle, first_index, num_indices); }
 }
 
 pub fn set_transient_index_buffer(tib: &TransientIndexBuffer, first_index: u32, num_indices: u32) {
     unsafe { bgfx_set_transient_index_buffer(tib, first_index, num_indices); }
 }
 
-pub fn set_vertex_buffer(stream: u8, handle: VertexBufferHandleImpl, start_vertex: u32, num_vertices: u32) {
-    unsafe { bgfx_set_vertex_buffer(stream, handle, start_vertex, num_vertices); }
+pub fn set_vertex_buffer(stream: u8, handle: VertexBufferHandle, start_vertex: u32, num_vertices: u32) {
+    unsafe { bgfx_set_vertex_buffer(stream, handle.handle, start_vertex, num_vertices); }
 }
 
-pub fn set_dynamic_vertex_buffer(stream: u8, handle: DynamicVertexBufferHandleImpl, start_vertex: u32, num_vertices: u32) {
-    unsafe { bgfx_set_dynamic_vertex_buffer(stream, handle, start_vertex, num_vertices); }
+pub fn set_dynamic_vertex_buffer(stream: u8, handle: DynamicVertexBufferHandle, start_vertex: u32, num_vertices: u32) {
+    unsafe { bgfx_set_dynamic_vertex_buffer(stream, handle.handle, start_vertex, num_vertices); }
 }
 
 pub fn set_transient_vertex_buffer(stream: u8, tvb: &TransientVertexBuffer, start_vertex: u32, num_vertices: u32) {
@@ -1091,16 +1091,16 @@ pub fn set_instance_data_buffer(idb: &InstanceDataBuffer, start: u32, num: u32) 
     unsafe { bgfx_set_instance_data_buffer(idb, start, num); }
 }
 
-pub fn set_instance_data_from_vertex_buffer(handle: VertexBufferHandleImpl, start_vertex: u32, num: u32) {
-    unsafe { bgfx_set_instance_data_from_vertex_buffer(handle, start_vertex, num); }
+pub fn set_instance_data_from_vertex_buffer(handle: VertexBufferHandle, start_vertex: u32, num: u32) {
+    unsafe { bgfx_set_instance_data_from_vertex_buffer(handle.handle, start_vertex, num); }
 }
 
-pub fn set_instance_data_from_dynamic_vertex_buffer(handle: DynamicVertexBufferHandleImpl, start_vertex: u32, num: u32) {
-    unsafe { bgfx_set_instance_data_from_dynamic_vertex_buffer(handle, start_vertex, num); }
+pub fn set_instance_data_from_dynamic_vertex_buffer(handle: DynamicVertexBufferHandle, start_vertex: u32, num: u32) {
+    unsafe { bgfx_set_instance_data_from_dynamic_vertex_buffer(handle.handle, start_vertex, num); }
 }
 
-pub fn set_texture(stage: u8, sampler: UniformHandleImpl, handle: TextureHandleImpl, flags: u32) {
-    unsafe { bgfx_set_texture(stage, sampler, handle, flags); }
+pub fn set_texture(stage: u8, sampler: UniformHandle, handle: &TextureHandle, flags: u32) {
+    unsafe { bgfx_set_texture(stage, sampler.handle, handle.expose_handle(), flags); }
 }
 
 pub fn touch(id: ViewId) {
@@ -1140,8 +1140,8 @@ pub fn set_view_mode(id: ViewId, mode: ViewMode) {
     unsafe { bgfx_set_view_mode(id, mode); }
 }
 
-pub fn set_view_frame_buffer(id: ViewId, handle: FrameBufferHandleImpl) {
-    unsafe { bgfx_set_view_frame_buffer(id, handle); }
+pub fn set_view_frame_buffer(id: ViewId, handle: FrameBufferHandle) {
+    unsafe { bgfx_set_view_frame_buffer(id, handle.handle); }
 }
 
 /* TODO rust api
@@ -1183,8 +1183,8 @@ pub fn frame(capture: bool) -> u32 {
 
 impl TextureHandle2D {
     /// *TODO*: API is subject to change; texture flags to be replaced with a typed bitfield.
-    pub fn with_memory(width: u16, height: u16, has_mips: bool, num_layers: u16, format: TextureFormat, flags: u32, mem: &MemoryImpl) -> TextureHandle2D {
-        unsafe{TextureHandle2D{handle:bgfx_create_texture_2d(width, height, has_mips, num_layers, format, flags, mem)}}
+    pub fn with_memory(width: u16, height: u16, has_mips: bool, num_layers: u16, format: TextureFormat, flags: u32, mem: &Memory) -> TextureHandle2D {
+        unsafe{TextureHandle2D{handle:bgfx_create_texture_2d(width, height, has_mips, num_layers, format, flags, mem.handle)}}
     }
 
     /// *TODO*: API is subject to change; texture flags to be replaced with a typed bitfield.
@@ -1192,13 +1192,13 @@ impl TextureHandle2D {
         unsafe{TextureHandle2D{handle:bgfx_create_texture_2d_scaled(ratio, has_mips, num_layers, format, flags)}}
     }
 
-    pub fn update(&mut self, layer: u16, mip: u8, x: u16, y: u16, width: u16, height: u16, mem: &MemoryImpl, pitch: u16) {
-        unsafe { bgfx_update_texture_2d(self.handle, layer, mip, x, y, width, height, mem, pitch); }
+    pub fn update(&mut self, layer: u16, mip: u8, x: u16, y: u16, width: u16, height: u16, mem: &Memory, pitch: u16) {
+        unsafe { bgfx_update_texture_2d(self.handle, layer, mip, x, y, width, height, mem.handle, pitch); }
     }
 
-    pub fn read_texture(handle: TextureHandleImpl, data: &mut [u8], mip: u8) -> u32 {
+    pub fn read_texture(&self, data: &mut [u8], mip: u8) -> u32 {
         // TODO ensure vector has enough space to receive the texture
-        unsafe { bgfx_read_texture(handle, transmute(data.as_mut_ptr()), mip) }
+        unsafe { bgfx_read_texture(self.handle, transmute(data.as_mut_ptr()), mip) }
     }
 }
 
@@ -1227,17 +1227,17 @@ impl Drop for TextureHandle2D {
 //---------------------------------------------------------------------
 
 impl TextureHandle3D {
-    pub fn update(handle: TextureHandleImpl, mip: u8, x: u16, y: u16, z: u16, width: u16, height: u16, depth: u16, mem: &Memory) {
-        unsafe { bgfx_update_texture_3d(handle, mip, x, y, z, width, height, depth, mem.handle); }
+    pub fn update(&mut self, mip: u8, x: u16, y: u16, z: u16, width: u16, height: u16, depth: u16, mem: &Memory) {
+        unsafe { bgfx_update_texture_3d(self.handle, mip, x, y, z, width, height, depth, mem.handle); }
     }
 
     pub fn with_memory(width: u16, height: u16, depth: u16, has_mips: bool, format: TextureFormat, flags: u32, mem: &Memory) -> TextureHandle3D {
         unsafe { TextureHandle3D{handle:bgfx_create_texture_3d(width, height, depth, has_mips, format, flags, mem.handle)}}
     }
 
-    pub fn read_texture(handle: TextureHandleImpl, data: &mut [u8], mip: u8) -> u32 {
+    pub fn read_texture(&self, data: &mut [u8], mip: u8) -> u32 {
         // TODO ensure vector has enough space to receive the texture
-        unsafe { bgfx_read_texture(handle, transmute(data.as_mut_ptr()), mip) }
+        unsafe { bgfx_read_texture(self.handle, transmute(data.as_mut_ptr()), mip) }
     }
 }
 
@@ -1266,8 +1266,8 @@ impl Drop for TextureHandle3D {
 //---------------------------------------------------------------------
 
 impl TextureHandleCube {
-    pub fn update_cube(handle: TextureHandleImpl, layer: u16, side: u8, mip: u8, x: u16, y: u16, width: u16, height: u16, mem: &Memory, pitch: u16) {
-        unsafe { bgfx_update_texture_cube(handle, layer, side, mip, x, y, width, height, mem.handle, pitch); }
+    pub fn update_cube(&mut self, layer: u16, side: u8, mip: u8, x: u16, y: u16, width: u16, height: u16, mem: &Memory, pitch: u16) {
+        unsafe { bgfx_update_texture_cube(self.handle, layer, side, mip, x, y, width, height, mem.handle, pitch); }
     }
 
     /// *TODO*: API is subject to change; texture flags to be replaced with a typed bitfield.
@@ -1275,9 +1275,9 @@ impl TextureHandleCube {
         unsafe { TextureHandleCube{handle:bgfx_create_texture_cube(size, has_mips, num_layers, format, flags, mem.handle)}}
     }
 
-    pub fn read_texture(handle: TextureHandleImpl, data: &mut [u8], mip: u8) -> u32 {
+    pub fn read_texture(&self, data: &mut [u8], mip: u8) -> u32 {
         // TODO ensure vector has enough space to receive the texture
-        unsafe { bgfx_read_texture(handle, transmute(data.as_mut_ptr()), mip) }
+        unsafe { bgfx_read_texture(self.handle, transmute(data.as_mut_ptr()), mip) }
     }
 }
 
