@@ -251,7 +251,7 @@ pub type DynamicVertexBufferHandleImpl = u16;
 pub type FrameBufferHandleImpl = u16;
 pub type IndexBufferHandleImpl = u16;
 pub type IndirectBufferHandleImpl = u16;
-pub type OcclusionQueryHandle = u16;
+pub type OcclusionQueryHandleImpl = u16;
 pub type ProgramHandle = u16;
 pub type ShaderHandleImpl = u16;
 pub type TextureHandleImpl = u16;
@@ -278,6 +278,7 @@ pub struct DynamicVertexBufferHandle { handle: DynamicVertexBufferHandleImpl }
 pub struct ShaderHandle { handle: ShaderHandleImpl }
 pub struct UniformHandle { handle: UniformHandleImpl }
 pub struct IndirectBufferHandle { handle: IndirectBufferHandleImpl }
+pub struct OcclusionQueryHandle { handle: OcclusionQueryHandleImpl }
 
 #[repr(C)]
 pub struct Memory {
@@ -658,9 +659,9 @@ extern "C" {
     fn bgfx_destroy_frame_buffer(handle: FrameBufferHandleImpl);
     fn bgfx_create_uniform(name: *const c_char, kind: UniformKind, num: u16) -> UniformHandleImpl;
     fn bgfx_destroy_uniform(handle: UniformHandleImpl);
-    fn bgfx_create_occlusion_query() -> OcclusionQueryHandle;
-    fn bgfx_get_result(handle: OcclusionQueryHandle, result: *mut i32) -> OcclusionQueryResult;
-    fn bgfx_destroy_occlusion_query(handle: OcclusionQueryHandle);
+    fn bgfx_create_occlusion_query() -> OcclusionQueryHandleImpl;
+    fn bgfx_get_result(handle: OcclusionQueryHandleImpl, result: *mut i32) -> OcclusionQueryResult;
+    fn bgfx_destroy_occlusion_query(handle: OcclusionQueryHandleImpl);
     fn bgfx_set_palette_color(index: u8, rgba: [c_float; 4]);
     fn bgfx_set_view_name(id: ViewId, name: *const c_char);
     fn bgfx_set_view_rect(id: ViewId, x: u16, y: u16, width: u16, height: u16);
@@ -676,7 +677,7 @@ extern "C" {
     fn bgfx_reset_view(id: ViewId);
     fn bgfx_set_marker(marker: *const c_char);
     fn bgfx_set_state(state: u64, rgba: u32);
-    fn bgfx_set_condition(handle: OcclusionQueryHandle, visible: bool);
+    fn bgfx_set_condition(handle: OcclusionQueryHandleImpl, visible: bool);
     fn bgfx_set_stencil(fstencil: u32, bstencil: u32);
     fn bgfx_set_scissor(x: u16, y: u16, width: u16, height: u16) -> u16;
     fn bgfx_set_scissor_cached(cache: u16);
@@ -697,7 +698,7 @@ extern "C" {
     fn bgfx_set_texture(stage: u8, sampler: UniformHandleImpl, handle: TextureHandleImpl, flags: u32);
     fn bgfx_touch(id: ViewId);
     fn bgfx_submit(id: ViewId, handle: ProgramHandle, depth: i32, preserveState: bool);
-    fn bgfx_submit_occlusion_query(id: ViewId, program: ProgramHandle, occlusionQuery: OcclusionQueryHandle, depth: i32, preserveState: bool);
+    fn bgfx_submit_occlusion_query(id: ViewId, program: ProgramHandle, occlusionQuery: OcclusionQueryHandleImpl, depth: i32, preserveState: bool);
     fn bgfx_submit_indirect(id: ViewId, handle: ProgramHandle, indirectHandle: IndirectBufferHandleImpl, start: u16, num: u16, depth: i32, preserveState: bool);
     fn bgfx_set_image(stage: u8, handle: TextureHandleImpl, mip: u8, access: Access, format: TextureFormat);
     fn bgfx_set_compute_index_buffer(stage: u8, handle: IndexBufferHandleImpl, access: Access);
@@ -711,7 +712,7 @@ extern "C" {
     fn bgfx_blit(id: ViewId, dst: TextureHandleImpl, dstMip: u8, dstX: u16, dstY: u16, dstZ: u16, src: TextureHandleImpl, srcMip: u8, srcX: u16, srcY: u16, srcZ: u16, width: u16, height: u16, depth: u16);
     fn bgfx_encoder_set_marker(encoder: *mut EncoderImpl, marker: *const c_char);
     fn bgfx_encoder_set_state(encoder: *mut EncoderImpl, state: u64, rgba: u32);
-    fn bgfx_encoder_set_condition(encoder: *mut EncoderImpl, handle: OcclusionQueryHandle, visible: bool);
+    fn bgfx_encoder_set_condition(encoder: *mut EncoderImpl, handle: OcclusionQueryHandleImpl, visible: bool);
     fn bgfx_encoder_set_stencil(encoder: *mut EncoderImpl, fstencil: u32, bstencil: u32);
     fn bgfx_encoder_set_scissor(encoder: *mut EncoderImpl, x: u16, y: u16, width: u16, height: u16) -> u16;
     fn bgfx_encoder_set_scissor_cached(encoder: *mut EncoderImpl, cache: u16);
@@ -732,7 +733,7 @@ extern "C" {
     fn bgfx_encoder_set_texture(encoder: *mut EncoderImpl, stage: u8, sampler: UniformHandleImpl, handle: TextureHandleImpl, flags: u32);
     fn bgfx_encoder_touch(encoder: *mut EncoderImpl, id: ViewId);
     fn bgfx_encoder_submit(encoder: *mut EncoderImpl, id: ViewId, handle: ProgramHandle, depth: i32, preserveState: bool);
-    fn bgfx_encoder_submit_occlusion_query(encoder: *mut EncoderImpl, id: ViewId, program: ProgramHandle, occlusionQuery: OcclusionQueryHandle, depth: i32, preserveState: bool);
+    fn bgfx_encoder_submit_occlusion_query(encoder: *mut EncoderImpl, id: ViewId, program: ProgramHandle, occlusionQuery: OcclusionQueryHandleImpl, depth: i32, preserveState: bool);
     fn bgfx_encoder_submit_indirect(encoder: *mut EncoderImpl, id: ViewId, handle: ProgramHandle, indirectHandle: IndirectBufferHandleImpl, start: u16, num: u16, depth: i32, preserveState: bool);
     fn bgfx_encoder_set_image(encoder: *mut EncoderImpl, stage: u8, handle: TextureHandleImpl, mip: u8, access: Access, format: TextureFormat);
     fn bgfx_encoder_set_compute_index_buffer(encoder: *mut EncoderImpl, stage: u8, handle: IndexBufferHandleImpl, access: Access);
@@ -811,7 +812,7 @@ impl Encoder {
         unsafe { bgfx_encoder_set_state(self.handle, state, rgba); }
     }
 
-    pub fn set_condition(&mut self, handle: OcclusionQueryHandle, visible: bool) {
+    pub fn set_condition(&mut self, handle: OcclusionQueryHandleImpl, visible: bool) {
         unsafe { bgfx_encoder_set_condition(self.handle, handle, visible); }
     }
 
@@ -895,7 +896,7 @@ impl Encoder {
         unsafe { bgfx_encoder_submit(self.handle, id, handle, depth, preserve_state); }
     }
 
-    pub fn submit_occlusion_query(&mut self, id: ViewId, program: ProgramHandle, occlusion_query: OcclusionQueryHandle, depth: i32, preserve_state: bool) {
+    pub fn submit_occlusion_query(&mut self, id: ViewId, program: ProgramHandle, occlusion_query: OcclusionQueryHandleImpl, depth: i32, preserve_state: bool) {
         unsafe { bgfx_encoder_submit_occlusion_query(self.handle, id, program, occlusion_query, depth, preserve_state); }
     }
 
@@ -955,7 +956,7 @@ pub fn submit(id: ViewId, handle: ProgramHandle, depth: i32, preserve_state: boo
     unsafe { bgfx_submit(id, handle, depth, preserve_state); }
 }
 
-pub fn submit_occlusion_query(id: ViewId, program: ProgramHandle, occlusion_query: OcclusionQueryHandle, depth: i32, preserve_state: bool) {
+pub fn submit_occlusion_query(id: ViewId, program: ProgramHandle, occlusion_query: OcclusionQueryHandleImpl, depth: i32, preserve_state: bool) {
     unsafe { bgfx_submit_occlusion_query(id, program, occlusion_query, depth, preserve_state); }
 }
 
@@ -1021,7 +1022,7 @@ pub fn set_state(state: u64, rgba: u32) {
     unsafe { bgfx_set_state(state, rgba); }
 }
 
-pub fn set_condition(handle: OcclusionQueryHandle, visible: bool) {
+pub fn set_condition(handle: OcclusionQueryHandleImpl, visible: bool) {
     unsafe { bgfx_set_condition(handle, visible); }
 }
 
@@ -1574,6 +1575,26 @@ pub fn calc_texture_size(info: &mut TextureInfo, width: u16, height: u16, depth:
     unsafe {bgfx_calc_texture_size(info, width, height, depth, cube_map, has_mips, num_layers, format)}
 }
 
+//---------------------------------------------------------------------
+// Occlusion query
+//---------------------------------------------------------------------
+
+impl OcclusionQueryHandle {
+    fn new() -> OcclusionQueryHandle {
+        unsafe{OcclusionQueryHandle{handle:bgfx_create_occlusion_query()}}
+    }
+
+    fn get_result(&mut self, result: &mut i32) -> OcclusionQueryResult {
+        unsafe{bgfx_get_result(self.handle, result)}
+    }
+}
+
+impl Drop for OcclusionQueryHandle {
+    fn drop(&mut self) {
+        unsafe{bgfx_destroy_occlusion_query(self.handle)}
+    }
+}
+
 // fn bgfx_vertex_pack(input: [c_float; 4], inputNormalized: bool, attr: Attrib, decl: *const VertexDecl, data: *mut c_void, index: u32);
 // fn bgfx_vertex_unpack(output: [c_float; 4], attr: Attrib, decl: *const VertexDecl, data: *const c_void, index: u32);
 // fn bgfx_vertex_convert(destDecl: *const VertexDecl, destData: *mut c_void, srcDecl: *const VertexDecl, srcData: *const c_void, num: u32);
@@ -1591,6 +1612,3 @@ pub fn calc_texture_size(info: &mut TextureInfo, width: u16, height: u16, depth:
 // fn bgfx_create_compute_program(csh: ShaderHandleImpl, destroyShaders: bool) -> ProgramHandle;
 // fn bgfx_destroy_program(handle: ProgramHandle);
 // fn bgfx_get_texture(handle: FrameBufferHandleImpl, attachment: u8) -> TextureHandleImpl;
-// fn bgfx_create_occlusion_query() -> OcclusionQueryHandle;
-// fn bgfx_get_result(handle: OcclusionQueryHandle, result: *mut i32) -> OcclusionQueryResult;
-// fn bgfx_destroy_occlusion_query(handle: OcclusionQueryHandle);
